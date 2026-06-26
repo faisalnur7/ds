@@ -5,17 +5,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>@yield('title', config('app.name', 'Laravel'))</title>
+        <title>@yield('title', config('app.name', 'Darus Salam CCIMS'))</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,700|inter:400,500,600" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="bg-slate-950 text-slate-100 antialiased">
+    <body class="ccims-text antialiased">
         <div
             x-data="{ sidebarOpen: false, userMenuOpen: false }"
-            class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.18),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(16,185,129,0.10),_transparent_24%),linear-gradient(180deg,_#020617_0%,_#0f172a_46%,_#111827_100%)]"
+            class="min-h-screen ccims-shell-bg"
         >
             <div class="flex min-h-screen">
                 <aside
@@ -23,12 +23,12 @@
                     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                 >
                     <div class="flex items-center gap-3">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-teal-400 to-emerald-500 text-slate-950 shadow-lg shadow-cyan-500/20">
-                            <span class="text-lg font-bold">A</span>
+                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 via-teal-400 to-slate-900 text-slate-950 shadow-lg shadow-amber-500/20">
+                            <span class="text-lg font-bold">DS</span>
                         </div>
                         <div>
-                            <p class="font-[family-name:Space_Grotesk] text-lg font-bold tracking-tight">Admin Panel</p>
-                            <p class="text-sm text-slate-400">Laravel 12 control center</p>
+                            <p class="font-[family-name:Space_Grotesk] text-lg font-bold tracking-tight">{{ config('app.name', 'Darus Salam CCIMS') }}</p>
+                            <p class="text-sm text-slate-400">Operations center</p>
                         </div>
                     </div>
 
@@ -36,8 +36,26 @@
                         <x-admin-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             Dashboard
                         </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                            Users
+                        <x-admin-nav-link :href="route('admin.members.index')" :active="request()->routeIs('admin.members.*')">
+                            Members
+                        </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.payments.index')" :active="request()->routeIs('admin.payments.*')">
+                            Payments
+                        </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.projects.index')" :active="request()->routeIs('admin.projects.*')">
+                            Projects
+                        </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.loans.index')" :active="request()->routeIs('admin.loans.*')">
+                            Loans
+                        </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.checkout.index')" :active="request()->routeIs('admin.checkout.*')">
+                            Checkout
+                        </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
+                            Settings
+                        </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.audit.index')" :active="request()->routeIs('admin.audit.*')">
+                            Audit
                         </x-admin-nav-link>
                         <x-admin-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')">
                             Profile
@@ -49,8 +67,8 @@
                         <p class="mt-1 font-medium text-white">{{ auth()->user()->name }}</p>
                         <p class="text-sm text-slate-400">{{ auth()->user()->email }}</p>
                         <div class="mt-4">
-                            <span class="inline-flex items-center rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-300">
-                                Admin access
+                            <span class="inline-flex items-center rounded-full bg-amber-400/15 px-3 py-1 text-xs font-semibold text-amber-200">
+                                Operations access
                             </span>
                         </div>
                     </div>
@@ -72,7 +90,7 @@
                                 </button>
                                 <div>
                                     <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Overview</p>
-                                    <h1 class="font-[family-name:Space_Grotesk] text-2xl font-bold text-white">@yield('header', 'Admin Dashboard')</h1>
+                                    <h1 class="font-[family-name:Space_Grotesk] text-2xl font-bold text-white">@yield('header', 'Operations Dashboard')</h1>
                                 </div>
                             </div>
 
@@ -82,17 +100,21 @@
                                     class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-left transition hover:bg-white/10"
                                     @click="userMenuOpen = ! userMenuOpen"
                                 >
-                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 text-sm font-bold text-slate-950">
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-teal-400 text-sm font-bold text-slate-950">
                                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                     </div>
                                     <div class="hidden sm:block">
                                         <p class="text-sm font-medium text-white">{{ auth()->user()->name }}</p>
-                                        <p class="text-xs text-slate-400">{{ auth()->user()->is_admin ? 'Administrator' : 'User' }}</p>
+                                        <p class="text-xs text-slate-400">{{ auth()->user()->isAdmin() ? 'Administrator' : 'Member' }}</p>
                                     </div>
                                     <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
                                     </svg>
                                 </button>
+
+                                <div class="hidden xl:block">
+                                    <x-theme-switcher />
+                                </div>
 
                                 <div
                                     x-show="userMenuOpen"

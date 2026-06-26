@@ -16,18 +16,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Admin User',
-                'password' => Hash::make('password'),
-                'is_admin' => true,
-                'email_verified_at' => now(),
-            ],
-        );
-
-        User::factory()
-            ->count(6)
-            ->create();
+        $this->call([
+            RolesAndUsersSeeder::class,
+            SettingsSeeder::class,
+            ShareSettingsSeeder::class,
+            MembersSeeder::class,
+            MemberDocumentsSeeder::class,
+            PaymentsSeeder::class,
+            ProjectsSeeder::class,
+            ProjectMembersSeeder::class,
+            ProjectIncomesSeeder::class,
+            ProfitDistributionsSeeder::class,
+            CheckoutRequestsSeeder::class,
+            LoansSeeder::class,
+            LoanRepaymentsSeeder::class,
+            NotificationsSeeder::class,
+            AuditLogsSeeder::class,
+        ]);
     }
 }

@@ -13,7 +13,7 @@ class EnsureUserIsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()?->is_admin) {
+        if (! $request->user()?->isAdmin()) {
             abort(403, 'You do not have access to the admin area.');
         }
 

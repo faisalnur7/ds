@@ -50,6 +50,15 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (Auth::user()?->status !== 'active') {
+            Auth::guard('web')->logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => __('This account is inactive.'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
