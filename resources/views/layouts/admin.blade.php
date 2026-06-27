@@ -106,7 +106,11 @@
                                 </div>
                             </div>
 
-                            <div class="relative">
+                            <div class="relative flex items-center gap-3">
+                                <div class="hidden xl:block">
+                                    <x-theme-switcher />
+                                </div>
+
                                 <button
                                     type="button"
                                     class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-left transition hover:bg-white/10"
@@ -123,10 +127,6 @@
                                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
                                     </svg>
                                 </button>
-
-                                <div class="hidden xl:block">
-                                    <x-theme-switcher />
-                                </div>
 
                                 <div
                                     x-show="userMenuOpen"
