@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class Member extends Model
 {
@@ -19,6 +20,7 @@ class Member extends Model
         'mother_name',
         'spouse_name',
         'spouse_phone',
+        'phone_search',
         'blood_group',
         'religion',
         'education',
@@ -46,6 +48,7 @@ class Member extends Model
     {
         return [
             'phone' => 'encrypted',
+            'phone_search' => 'string',
             'nid_number' => 'encrypted',
             'address' => 'encrypted',
             'present_address' => 'encrypted',
@@ -73,5 +76,14 @@ class Member extends Model
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
+    }
+
+    public function getCheckoutEligibleOnAttribute(): ?Carbon
+    {
+        if (! $this->join_date || ! $this->checkout_eligible_after_months) {
+            return null;
+        }
+
+        return Carbon::parse($this->join_date)->copy()->addMonths((int) $this->checkout_eligible_after_months);
     }
 }

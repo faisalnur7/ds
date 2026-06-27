@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Member;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class MemberController extends CrudController
 {
@@ -34,6 +36,51 @@ class MemberController extends CrudController
         return 'Member onboarding, KYC, and lifecycle records.';
     }
 
+    public function index(Request $request): View
+    {
+        $query = Member::query()->with('user');
+
+        if ($search = trim((string) $request->string('q'))) {
+            $searchDigits = preg_replace('/\D+/', '', $search);
+
+            $query->where(function ($builder) use ($search, $searchDigits): void {
+                $builder->where('member_code', 'like', "%{$search}%")
+                    ->orWhere('full_name', 'like', "%{$search}%")
+                    ->orWhere('phone_search', 'like', "%{$search}%");
+
+                if ($searchDigits !== '' && $searchDigits !== $search) {
+                    $builder->orWhere('phone_search', 'like', "%{$searchDigits}%");
+                }
+
+                if (is_numeric($search)) {
+                    $builder->orWhere('id', (int) $search);
+                }
+            });
+        }
+
+        if ($jimmadarId = $request->filled('jimmadar_id') ? $request->integer('jimmadar_id') : null) {
+            $query->where('user_id', $jimmadarId);
+        }
+
+        if ($joinFrom = $request->filled('join_from') ? $request->date('join_from') : null) {
+            $query->whereDate('join_date', '>=', $joinFrom);
+        }
+
+        if ($joinTo = $request->filled('join_to') ? $request->date('join_to') : null) {
+            $query->whereDate('join_date', '<=', $joinTo);
+        }
+
+        $members = $query->latest('join_date')->latest('id')->paginate(10)->withQueryString();
+
+        return view('admin.members.index', [
+            'title' => $this->title(),
+            'description' => $this->pageDescription(),
+            'members' => $members,
+            'jimmadars' => User::query()->orderBy('name')->pluck('name', 'id')->all(),
+            'filters' => $request->only(['q', 'jimmadar_id', 'join_from', 'join_to']),
+        ]);
+    }
+
     protected function columns(): array
     {
         return [
@@ -52,7 +99,7 @@ class MemberController extends CrudController
     protected function formFields(?Model $record = null): array
     {
         return [
-            ['name' => 'user_id', 'label' => 'Linked User', 'type' => 'select', 'options' => User::query()->pluck('name', 'id')->all()],
+            ['name' => 'user_id', 'label' => 'Jimmadar', 'type' => 'select', 'options' => User::query()->pluck('name', 'id')->all()],
             ['name' => 'member_code', 'label' => 'Member Code', 'type' => 'text'],
             ['name' => 'full_name', 'label' => 'Full Name', 'type' => 'text'],
             ['name' => 'father_name', 'label' => 'Father Name', 'type' => 'text'],
@@ -88,6 +135,7 @@ class MemberController extends CrudController
             ['name' => 'reference_phone', 'label' => 'Reference Phone', 'type' => 'text'],
             ['name' => 'remarks', 'label' => 'Remarks', 'type' => 'textarea', 'span' => 2],
             ['name' => 'join_date', 'label' => 'Join Date', 'type' => 'date'],
+            ['name' => 'checkout_eligible_on', 'label' => 'Checkout Eligible On', 'type' => 'computed-date', 'help' => 'Calculated from join date and checkout months.', 'span' => 2],
             ['name' => 'membership_status', 'label' => 'Membership Status', 'type' => 'select', 'options' => ['active' => 'Active', 'revoked' => 'Revoked', 'checked_out' => 'Checked Out']],
             ['name' => 'checkout_eligible_after_months', 'label' => 'Checkout Eligible After Months', 'type' => 'number'],
         ];
@@ -125,5 +173,16 @@ class MemberController extends CrudController
             'membership_status' => ['required', 'in:active,revoked,checked_out'],
             'checkout_eligible_after_months' => ['nullable', 'integer', 'min:0'],
         ];
+    }
+
+    protected function transformInput(array $input, ?Model $record = null): array
+    {
+        $input['phone_search'] = preg_replace('/\D+/', '', (string) ($input['phone'] ?? ''));
+
+        if ($input['phone_search'] === '') {
+            $input['phone_search'] = null;
+        }
+
+        return $input;
     }
 }

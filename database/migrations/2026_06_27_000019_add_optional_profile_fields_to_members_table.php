@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('mother_name')->nullable()->after('father_name');
             $table->string('spouse_name')->nullable()->after('mother_name');
             $table->string('spouse_phone')->nullable()->after('spouse_name');
+            $table->string('phone_search')->nullable()->index()->after('spouse_phone');
             $table->string('blood_group', 10)->nullable()->after('spouse_phone');
             $table->string('religion')->nullable()->after('blood_group');
             $table->string('education')->nullable()->after('religion');
@@ -34,6 +35,7 @@ return new class extends Migration
                 'mother_name',
                 'spouse_name',
                 'spouse_phone',
+                'phone_search',
                 'blood_group',
                 'religion',
                 'education',

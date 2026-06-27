@@ -21,6 +21,7 @@ class MembersSeeder extends Seeder
                 'mother_name' => 'Mother Name',
                 'spouse_name' => 'Spouse Name',
                 'spouse_phone' => '+8801700000003',
+                'phone_search' => '8801700000001',
                 'blood_group' => 'B+',
                 'religion' => 'Islam',
                 'education' => 'Graduate',

@@ -30,6 +30,8 @@
                                 {{ $value ? 'On' : 'Off' }}
                             @elseif (($field['type'] ?? 'text') === 'multiselect')
                                 {{ $value instanceof \Illuminate\Support\Collection ? $value->pluck('name')->join(', ') : collect($value ?? [])->join(', ') }}
+                            @elseif (($field['type'] ?? 'text') === 'computed-date')
+                                {{ optional($value)->format('M j, Y') ?? '—' }}
                             @elseif (($field['type'] ?? 'text') === 'money')
                                 {{ number_format((float) $value, 2) }}
                             @else

@@ -56,6 +56,48 @@
                                     </label>
                                 @endforeach
                             </div>
+                        @elseif (($field['type'] ?? 'text') === 'computed-date')
+                            <div
+                                x-data="{
+                                    value: '',
+                                    update() {
+                                        const joinInput = document.getElementById(@js($field['date_source'] ?? 'join_date'));
+                                        const monthsInput = document.getElementById(@js($field['months_source'] ?? 'checkout_eligible_after_months'));
+                                        const joinValue = joinInput?.value || '';
+                                        const monthsValue = parseInt(monthsInput?.value || '0', 10);
+
+                                        if (! joinValue) {
+                                            this.value = '';
+                                            return;
+                                        }
+
+                                        const date = new Date(`${joinValue}T00:00:00`);
+
+                                        if (Number.isNaN(date.getTime())) {
+                                            this.value = '';
+                                            return;
+                                        }
+
+                                        if (monthsValue > 0) {
+                                            date.setMonth(date.getMonth() + monthsValue);
+                                        }
+
+                                        this.value = date.toISOString().slice(0, 10);
+                                    },
+                                    bind() {
+                                        const joinInput = document.getElementById(@js($field['date_source'] ?? 'join_date'));
+                                        const monthsInput = document.getElementById(@js($field['months_source'] ?? 'checkout_eligible_after_months'));
+                                        joinInput?.addEventListener('input', () => this.update());
+                                        joinInput?.addEventListener('change', () => this.update());
+                                        monthsInput?.addEventListener('input', () => this.update());
+                                        monthsInput?.addEventListener('change', () => this.update());
+                                    }
+                                }"
+                                x-init="update(); bind()"
+                                class="space-y-2"
+                            >
+                                <input type="text" readonly :value="value" class="ccims-input bg-white/10">
+                            </div>
                         @else
                             <input id="{{ $field['name'] }}" type="{{ $field['type'] ?? 'text' }}" name="{{ $field['name'] }}" value="{{ ($field['type'] ?? 'text') === 'password' ? '' : $rawValue }}" class="ccims-input">
                         @endif

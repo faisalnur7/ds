@@ -85,4 +85,47 @@ class AdminCrudTest extends TestCase
             'full_name' => 'Optional Info Member',
         ]);
     }
+
+    public function test_member_index_supports_search_and_filters(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $jimmadar = User::factory()->create(['name' => 'Jimmadar One']);
+        $otherJimmadar = User::factory()->create(['name' => 'Jimmadar Two']);
+
+        $memberA = \App\Models\Member::factory()->create([
+            'user_id' => $jimmadar->id,
+            'member_code' => 'DS-1001',
+            'full_name' => 'Alpha Member',
+            'phone' => '+8801700001001',
+            'phone_search' => '8801700001001',
+            'join_date' => '2026-01-15',
+        ]);
+
+        $memberB = \App\Models\Member::factory()->create([
+            'user_id' => $otherJimmadar->id,
+            'member_code' => 'DS-1002',
+            'full_name' => 'Beta Member',
+            'phone' => '+8801700001002',
+            'phone_search' => '8801700001002',
+            'join_date' => '2026-03-20',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.members.index', ['q' => '1001']))
+            ->assertOk()
+            ->assertSee('DS-1001')
+            ->assertDontSee('DS-1002');
+
+        $this->actingAs($admin)
+            ->get(route('admin.members.index', ['jimmadar_id' => $jimmadar->id]))
+            ->assertOk()
+            ->assertSee('Alpha Member')
+            ->assertDontSee('Beta Member');
+
+        $this->actingAs($admin)
+            ->get(route('admin.members.index', ['join_from' => '2026-03-01', 'join_to' => '2026-03-31']))
+            ->assertOk()
+            ->assertSee('Beta Member')
+            ->assertDontSee('Alpha Member');
+    }
 }

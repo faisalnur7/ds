@@ -76,7 +76,7 @@ abstract class CrudController extends Controller
         //
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
         return view("admin.crud.index", [
             'title' => $this->title(),
