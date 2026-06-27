@@ -10,8 +10,6 @@ class ProjectIncome extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'project_id',
         'income_type',

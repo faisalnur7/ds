@@ -10,8 +10,6 @@ class MemberDocument extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'member_id',
         'doc_type',

@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -63,6 +64,64 @@ class User extends Authenticatable
     public function member(): HasOne
     {
         return $this->hasOne(Member::class);
+    }
+
+    public function roleModel(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role', 'slug')->withDefault([
+            'name' => ucfirst((string) $this->role ?: 'Member'),
+            'slug' => $this->role ?: 'member',
+        ]);
+    }
+
+    public function permissions(): array
+    {
+        $permissions = $this->roleModel->permissions()->pluck('slug')->all();
+
+        if (! empty($permissions)) {
+            return $permissions;
+        }
+
+        return match ($this->role) {
+            'super_admin' => [
+                'view_dashboard',
+                'manage_members',
+                'manage_payments',
+                'manage_projects',
+                'manage_profits',
+                'manage_loans',
+                'manage_checkout',
+                'manage_settings',
+                'view_audit_logs',
+                'manage_roles',
+                'manage_permissions',
+            ],
+            'admin' => [
+                'view_dashboard',
+                'manage_members',
+                'manage_payments',
+                'manage_projects',
+                'manage_profits',
+                'manage_loans',
+                'manage_checkout',
+                'manage_settings',
+                'view_audit_logs',
+                'manage_roles',
+                'manage_permissions',
+            ],
+            'cashier' => ['view_dashboard', 'manage_payments'],
+            'auditor' => ['view_dashboard', 'view_audit_logs'],
+            default => ['view_dashboard'],
+        };
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return in_array($permission, $this->permissions(), true);
     }
 
     public function auditLogs(): HasMany

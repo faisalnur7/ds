@@ -10,8 +10,6 @@ class ProfitDistribution extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'project_id',
         'member_id',

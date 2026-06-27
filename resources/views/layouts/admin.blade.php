@@ -36,6 +36,15 @@
                         <x-admin-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             Dashboard
                         </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                            Users
+                        </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')">
+                            Roles
+                        </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.permissions.index')" :active="request()->routeIs('admin.permissions.*')">
+                            Permissions
+                        </x-admin-nav-link>
                         <x-admin-nav-link :href="route('admin.members.index')" :active="request()->routeIs('admin.members.*')">
                             Members
                         </x-admin-nav-link>
@@ -48,8 +57,11 @@
                         <x-admin-nav-link :href="route('admin.loans.index')" :active="request()->routeIs('admin.loans.*')">
                             Loans
                         </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.checkout.index')" :active="request()->routeIs('admin.checkout.*')">
+                        <x-admin-nav-link :href="route('admin.checkout-requests.index')" :active="request()->routeIs('admin.checkout-requests.*')">
                             Checkout
+                        </x-admin-nav-link>
+                        <x-admin-nav-link :href="route('admin.share-settings.index')" :active="request()->routeIs('admin.share-settings.*')">
+                            Share Settings
                         </x-admin-nav-link>
                         <x-admin-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
                             Settings

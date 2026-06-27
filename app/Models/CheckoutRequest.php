@@ -10,8 +10,6 @@ class CheckoutRequest extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'member_id',
         'requested_at',
