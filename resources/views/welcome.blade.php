@@ -18,43 +18,29 @@
                     <section class="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/20 backdrop-blur-xl lg:p-12">
                         <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-slate-950/50 px-4 py-2 text-sm text-slate-300">
                             <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                            Darus Salam CCIMS
+                            {{ config('app.name', 'Darus Salam CCIMS') }}
                         </div>
 
                         <h1 class="mt-6 max-w-2xl font-[family-name:Space_Grotesk] text-4xl font-bold leading-tight text-white sm:text-6xl">
-                            Capital collection, loan tracking, and member profit management in one place.
+                            {{ __('Capital collection, loan tracking, and member profit management in one place.') }}
                         </h1>
                         <p class="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                            Darus Salam CCIMS is the operating system for member onboarding, monthly payments, fines, share ownership, loan disbursement, checkout, and compliance reporting.
+                            {{ __('Darus Salam CCIMS is the operating system for member onboarding, monthly payments, fines, share ownership, loan disbursement, checkout, and compliance reporting.') }}
                         </p>
 
                         <div class="mt-8 flex flex-wrap gap-3">
                             <a href="{{ route('login') }}" class="rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-300">
-                                Go to login
+                                {{ __('Go to login') }}
                             </a>
                             @auth
                                 @if (auth()->user()->isAdmin())
                                 <a href="{{ route('admin.dashboard') }}" class="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/5">
-                                    Open admin panel
+                                    {{ __('Open admin panel') }}
                                 </a>
                                 @endif
                             @endauth
                         </div>
 
-                        <div class="mt-10 grid gap-4 sm:grid-cols-3">
-                            <div class="rounded-3xl border border-white/10 bg-slate-950/40 p-4">
-                                <p class="text-sm text-slate-400">Members</p>
-                                <p class="mt-2 text-lg font-semibold text-white">KYC ready</p>
-                            </div>
-                            <div class="rounded-3xl border border-white/10 bg-slate-950/40 p-4">
-                                <p class="text-sm text-slate-400">Theme</p>
-                                <p class="mt-2 text-lg font-semibold text-white">Midnight gold</p>
-                            </div>
-                            <div class="rounded-3xl border border-white/10 bg-slate-950/40 p-4">
-                                <p class="text-sm text-slate-400">Login</p>
-                                <p class="mt-2 text-lg font-semibold text-white">Role based</p>
-                            </div>
-                        </div>
                     </section>
 
                     <section class="rounded-[2rem] border border-white/10 bg-slate-950/80 p-8 shadow-2xl shadow-black/30 backdrop-blur-xl lg:p-10">
@@ -63,23 +49,23 @@
                                 <span class="font-[family-name:Space_Grotesk] text-xl font-bold">DS</span>
                             </div>
                             <div>
-                                <p class="font-[family-name:Space_Grotesk] text-2xl font-bold text-white">CCIMS Control Center</p>
-                                <p class="text-sm text-slate-400">Designed for finance operations, not just demos.</p>
+                                <p class="font-[family-name:Space_Grotesk] text-2xl font-bold text-white">{{ __('CCIMS Control Center') }}</p>
+                                <p class="text-sm text-slate-400">{{ __('Designed for finance operations, not just demos.') }}</p>
                             </div>
                         </div>
 
                         <div class="mt-10 space-y-4">
                             <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
-                                <p class="text-sm text-slate-400">Membership</p>
-                                <p class="mt-2 text-lg font-medium text-white">Member onboarding, KYC, and role-based access.</p>
+                                <p class="text-sm text-slate-400">{{ __('Membership') }}</p>
+                                <p class="mt-2 text-lg font-medium text-white">{{ __('Member onboarding, KYC, and role-based access.') }}</p>
                             </div>
                             <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
-                                <p class="text-sm text-slate-400">Collections</p>
-                                <p class="mt-2 text-lg font-medium text-white">Monthly payments, late fines, and partial settlement.</p>
+                                <p class="text-sm text-slate-400">{{ __('Collections') }}</p>
+                                <p class="mt-2 text-lg font-medium text-white">{{ __('Monthly payments, late fines, and partial settlement.') }}</p>
                             </div>
                             <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
-                                <p class="text-sm text-slate-400">Finance</p>
-                                <p class="mt-2 text-lg font-medium text-white">Loans against shares, profit distribution, and checkout.</p>
+                                <p class="text-sm text-slate-400">{{ __('Finance') }}</p>
+                                <p class="mt-2 text-lg font-medium text-white">{{ __('Loans against shares, profit distribution, and checkout.') }}</p>
                             </div>
                         </div>
                     </section>

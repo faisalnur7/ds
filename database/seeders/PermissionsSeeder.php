@@ -10,19 +10,31 @@ class PermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        $permissions = [
-            ['name' => 'View dashboard', 'slug' => 'view_dashboard', 'group_name' => 'dashboard'],
-            ['name' => 'Manage members', 'slug' => 'manage_members', 'group_name' => 'members'],
-            ['name' => 'Manage payments', 'slug' => 'manage_payments', 'group_name' => 'payments'],
-            ['name' => 'Manage projects', 'slug' => 'manage_projects', 'group_name' => 'projects'],
-            ['name' => 'Manage profits', 'slug' => 'manage_profits', 'group_name' => 'profits'],
-            ['name' => 'Manage loans', 'slug' => 'manage_loans', 'group_name' => 'loans'],
-            ['name' => 'Manage checkout', 'slug' => 'manage_checkout', 'group_name' => 'checkout'],
-            ['name' => 'Manage settings', 'slug' => 'manage_settings', 'group_name' => 'settings'],
-            ['name' => 'View audit logs', 'slug' => 'view_audit_logs', 'group_name' => 'compliance'],
-            ['name' => 'Manage roles', 'slug' => 'manage_roles', 'group_name' => 'access'],
-            ['name' => 'Manage permissions', 'slug' => 'manage_permissions', 'group_name' => 'access'],
-        ];
+        $permissions = array_merge(
+            $this->crudPermissions('users', 'Users'),
+            $this->crudPermissions('roles', 'Roles'),
+            $this->crudPermissions('permissions', 'Permissions'),
+            $this->crudPermissions('settings', 'Settings'),
+            $this->crudPermissions('share_settings', 'Share Settings'),
+            $this->crudPermissions('members', 'Members'),
+            $this->crudPermissions('member_documents', 'Member Documents'),
+            $this->crudPermissions('payments', 'Payments'),
+            $this->crudPermissions('projects', 'Projects'),
+            $this->crudPermissions('project_members', 'Project Members'),
+            $this->crudPermissions('project_incomes', 'Project Incomes'),
+            $this->crudPermissions('profit_distributions', 'Profit Distributions'),
+            $this->crudPermissions('loans', 'Loans'),
+            $this->crudPermissions('checkout_requests', 'Checkout Requests'),
+            $this->crudPermissions('expense_categories', 'Expense Categories'),
+            $this->crudPermissions('expenses', 'Expenses'),
+            [
+                ['name' => 'View dashboard', 'slug' => 'view_dashboard', 'group_name' => 'dashboard'],
+                ['name' => 'View payment history', 'slug' => 'view_payment_history', 'group_name' => 'payments'],
+                ['name' => 'View audit logs', 'slug' => 'view_audit_logs', 'group_name' => 'compliance'],
+                ['name' => 'View expense menu', 'slug' => 'view_expense_menu', 'group_name' => 'expenses'],
+                ['name' => 'Approve expenses', 'slug' => 'approve_expenses', 'group_name' => 'expenses'],
+            ],
+        );
 
         foreach ($permissions as $permission) {
             Permission::updateOrCreate(['slug' => $permission['slug']], $permission);
@@ -30,14 +42,28 @@ class PermissionsSeeder extends Seeder
 
         $map = [
             'super_admin' => array_column($permissions, 'slug'),
-            'admin' => [
-                'view_dashboard', 'manage_members', 'manage_payments', 'manage_projects',
-                'manage_profits', 'manage_loans', 'manage_checkout', 'manage_settings',
-                'view_audit_logs',
+            'admin' => array_column($permissions, 'slug'),
+            'cashier' => [
+                'view_dashboard',
+                'view_payments',
+                'create_payments',
+                'edit_payments',
+                'update_payments',
+                'view_expense_categories',
+                'create_expense_categories',
+                'edit_expense_categories',
+                'update_expense_categories',
+                'delete_expense_categories',
+                'view_expenses',
+                'create_expenses',
+                'edit_expenses',
+                'update_expenses',
+                'delete_expenses',
+                'approve_expenses',
+                'view_payment_history',
             ],
-            'cashier' => ['view_dashboard', 'manage_payments'],
             'auditor' => ['view_dashboard', 'view_audit_logs'],
-            'member' => ['view_dashboard'],
+            'member' => ['view_dashboard', 'view_payment_history'],
         ];
 
         foreach ($map as $roleSlug => $permissionSlugs) {
@@ -49,5 +75,19 @@ class PermissionsSeeder extends Seeder
             $permissionIds = Permission::query()->whereIn('slug', $permissionSlugs)->pluck('id');
             $role->permissions()->sync($permissionIds);
         }
+    }
+
+    /**
+     * @return array<int, array{name: string, slug: string, group_name: string}>
+     */
+    private function crudPermissions(string $subject, string $label): array
+    {
+        return [
+            ['name' => "View {$label}", 'slug' => "view_{$subject}", 'group_name' => $subject],
+            ['name' => "Create {$label}", 'slug' => "create_{$subject}", 'group_name' => $subject],
+            ['name' => "Edit {$label}", 'slug' => "edit_{$subject}", 'group_name' => $subject],
+            ['name' => "Update {$label}", 'slug' => "update_{$subject}", 'group_name' => $subject],
+            ['name' => "Delete {$label}", 'slug' => "delete_{$subject}", 'group_name' => $subject],
+        ];
     }
 }

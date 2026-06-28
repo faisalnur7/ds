@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
     :root {
         --ccims-bg: #020617;
         --ccims-bg-accent: #0f172a;

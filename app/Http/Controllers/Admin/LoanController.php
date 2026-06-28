@@ -6,6 +6,8 @@ use App\Models\Loan;
 use App\Models\Member;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class LoanController extends CrudController
 {
@@ -37,7 +39,8 @@ class LoanController extends CrudController
     protected function columns(): array
     {
         return [
-            ['label' => 'Member', 'key' => 'member.member_code'],
+            ['label' => 'Borrower', 'key' => 'member.full_name'],
+            ['label' => 'Member Code', 'key' => 'member.member_code'],
             ['label' => 'Principal', 'key' => 'principal_amount', 'type' => 'money'],
             ['label' => 'Tenure', 'key' => 'tenure_months'],
             ['label' => 'Status', 'key' => 'status'],
@@ -47,6 +50,23 @@ class LoanController extends CrudController
     protected function with(): array
     {
         return ['member'];
+    }
+
+    public function show(Request $request): View
+    {
+        $record = $this->resolveRecord($request);
+        $record->load([
+            'member.user',
+            'approver',
+            'repayments' => fn ($query) => $query->orderBy('due_date')->orderBy('id'),
+        ]);
+
+        return view('admin.loans.show', [
+            'title' => $this->title(),
+            'description' => $this->pageDescription(),
+            'record' => $record,
+            'routePrefix' => $this->viewPrefix(),
+        ]);
     }
 
     protected function formFields(?Model $record = null): array

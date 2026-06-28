@@ -1,9 +1,9 @@
 <x-guest-layout>
     <div class="mb-8">
-        <p class="text-sm font-medium uppercase tracking-[0.25em] text-amber-200/80">Welcome back</p>
-        <h2 class="mt-3 font-[family-name:Space_Grotesk] text-3xl font-bold text-white">Log in to continue</h2>
+        <p class="text-sm font-medium uppercase tracking-[0.25em] text-amber-200/80">{{ __('Welcome back') }}</p>
+        <h2 class="mt-3 font-[family-name:Space_Grotesk] text-3xl font-bold text-white">{{ __('Log in to continue') }}</h2>
         <p class="mt-2 text-sm leading-6 text-slate-400">
-            Secure access for operators, auditors, and members. Demo admin credentials: <span class="font-medium text-slate-200">admin@example.com</span> / <span class="font-medium text-slate-200">password</span>
+            {{ __('Secure access for operators, auditors, and members. Demo admin credentials:') }} <span class="font-medium text-slate-200">admin@example.com</span> / <span class="font-medium text-slate-200">password</span>
         </p>
     </div>
 

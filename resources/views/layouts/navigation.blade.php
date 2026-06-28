@@ -9,7 +9,7 @@
                         <x-application-logo class="block h-9 w-9 fill-current text-white" />
                         <div class="hidden sm:block">
                             <p class="font-[family-name:Space_Grotesk] text-base font-bold tracking-tight text-white">{{ config('app.name', 'Darus Salam CCIMS') }}</p>
-                            <p class="text-xs text-slate-400">Member capital operations</p>
+                            <p class="text-xs text-slate-400">{{ __('Member capital operations') }}</p>
                         </div>
                     </a>
                 </div>
@@ -19,6 +19,11 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @if (Auth::user()?->hasPermission('view_payment_history'))
+                        <x-nav-link :href="route('payment-history.index')" :active="request()->routeIs('payment-history.*')">
+                            {{ __('Payment History') }}
+                        </x-nav-link>
+                    @endif
                     @if (Auth::user()?->isAdmin())
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
                             {{ __('Admin') }}
@@ -29,6 +34,7 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:ms-6 sm:flex sm:items-center sm:gap-4">
+                <x-language-switcher />
                 <x-theme-switcher />
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
@@ -80,6 +86,11 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if (Auth::user()?->hasPermission('view_payment_history'))
+                <x-responsive-nav-link :href="route('payment-history.index')" :active="request()->routeIs('payment-history.*')">
+                    {{ __('Payment History') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -87,6 +98,11 @@
             <div class="px-4">
                 <div class="text-base font-medium text-white">{{ Auth::user()->name }}</div>
                 <div class="text-sm font-medium text-slate-400">{{ Auth::user()->email }}</div>
+            </div>
+
+            <div class="mt-3 flex items-center gap-3 px-4">
+                <x-language-switcher />
+                <x-theme-switcher />
             </div>
 
             <div class="mt-3 space-y-1">

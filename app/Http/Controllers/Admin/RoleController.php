@@ -53,6 +53,25 @@ class RoleController extends CrudController
 
     protected function formFields(?Model $record = null): array
     {
+        $permissions = Permission::query()
+            ->orderByRaw('COALESCE(group_name, \'\')')
+            ->orderBy('name')
+            ->get();
+
+        $groupedPermissions = $permissions
+            ->groupBy(fn (Permission $permission) => $permission->group_name ?: 'other')
+            ->map(function ($items, string $groupName): array {
+                return [
+                    'label' => Str::headline(str_replace(['_', '-'], ' ', $groupName)),
+                    'permissions' => $items->map(fn (Permission $permission): array => [
+                        'id' => $permission->id,
+                        'name' => $permission->name,
+                    ])->all(),
+                ];
+            })
+            ->values()
+            ->all();
+
         return [
             ['name' => 'name', 'label' => 'Name', 'type' => 'text'],
             ['name' => 'slug', 'label' => 'Slug', 'type' => 'text', 'help' => 'Use snake_case.'],
@@ -60,9 +79,9 @@ class RoleController extends CrudController
             [
                 'name' => 'permissions',
                 'label' => 'Permissions',
-                'type' => 'multiselect',
+                'type' => 'grouped-multiselect',
                 'span' => 2,
-                'options' => Permission::query()->orderBy('group_name')->orderBy('name')->pluck('name', 'id')->all(),
+                'groups' => $groupedPermissions,
             ],
             ['name' => 'is_system', 'label' => 'System Role', 'type' => 'toggle', 'helper' => 'Protect this role from deletion.'],
         ];

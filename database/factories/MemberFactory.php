@@ -3,8 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Member;
+use App\Models\MemberShareHistory;
+use App\Models\ShareSetting;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
 /**
  * @extends Factory<Member>
@@ -12,6 +15,25 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class MemberFactory extends Factory
 {
     protected $model = Member::class;
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Member $member): void {
+            $shareSetting = ShareSetting::current();
+
+            MemberShareHistory::query()->create([
+                'member_id' => $member->id,
+                'changed_by' => null,
+                'previous_share_number' => null,
+                'share_number' => $member->share_number,
+                'share_value_per_share' => $shareSetting?->share_value,
+                'share_cost_per_share' => $shareSetting?->share_cost,
+                'monthly_amount' => $shareSetting ? ((float) $shareSetting->share_value + (float) $shareSetting->share_cost) * (int) $member->share_number : null,
+                'changed_at' => Carbon::now(),
+                'note' => 'Initial share record created by factory.',
+            ]);
+        });
+    }
 
     public function definition(): array
     {
@@ -21,6 +43,7 @@ class MemberFactory extends Factory
             'user_id' => User::factory(),
             'member_code' => 'DS-'.fake()->unique()->numberBetween(1000, 9999),
             'full_name' => fake()->name(),
+            'share_number' => fake()->numberBetween(1, 10),
             'father_name' => fake()->name('male'),
             'mother_name' => fake()->name('female'),
             'spouse_name' => fake()->name(),
@@ -41,7 +64,6 @@ class MemberFactory extends Factory
             'remarks' => fake()->sentence(),
             'join_date' => now()->subMonths(3)->toDateString(),
             'membership_status' => 'active',
-            'checkout_eligible_after_months' => 12,
         ];
     }
 }

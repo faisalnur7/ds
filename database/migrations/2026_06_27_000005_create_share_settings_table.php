@@ -13,7 +13,6 @@ return new class extends Migration
             $table->decimal('share_value', 12, 2);
             $table->decimal('share_cost', 12, 2);
             $table->decimal('fine_amount', 12, 2)->default(0);
-            $table->decimal('fine_percent', 8, 2)->default(0);
             $table->date('effective_from')->index();
             $table->boolean('is_active')->default(false);
             $table->timestamps();

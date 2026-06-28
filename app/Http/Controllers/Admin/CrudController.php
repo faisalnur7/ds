@@ -41,6 +41,31 @@ abstract class CrudController extends Controller
         return '';
     }
 
+    protected function permissionPrefix(): string
+    {
+        return Str::snake(str_replace('-', '_', $this->viewPrefix()));
+    }
+
+    protected function permissionFor(string $action): string
+    {
+        return "{$action}_{$this->permissionPrefix()}";
+    }
+
+    protected function can(Request $request, string $action): bool
+    {
+        return (bool) $request->user()?->hasPermission($this->permissionFor($action));
+    }
+
+    protected function requirePermission(Request $request, string $action): void
+    {
+        abort_unless($this->can($request, $action), 403, 'You do not have permission to access this area.');
+    }
+
+    protected function showContext(Model $record): array
+    {
+        return [];
+    }
+
     protected function query()
     {
         $model = $this->modelClass();
@@ -60,10 +85,10 @@ abstract class CrudController extends Controller
         $record = $request->route($this->routeParameter());
 
         if ($record instanceof Model) {
-            return $record;
+            return $record->loadMissing($this->with());
         }
 
-        return $model::query()->findOrFail($record);
+        return $this->query()->findOrFail($record);
     }
 
     protected function transformInput(array $input, ?Model $record = null): array
@@ -78,18 +103,28 @@ abstract class CrudController extends Controller
 
     public function index(Request $request): View
     {
+        $this->requirePermission($request, 'view');
+
         return view("admin.crud.index", [
             'title' => $this->title(),
             'description' => $this->pageDescription(),
             'columns' => $this->columns(),
             'records' => $this->query()->latest()->paginate(10),
             'routePrefix' => $this->viewPrefix(),
+            'canCreate' => $this->can($request, 'create'),
+            'canView' => $this->can($request, 'view'),
+            'canEdit' => $this->can($request, 'edit'),
+            'canDelete' => $this->can($request, 'delete'),
+            'canUpdate' => $this->can($request, 'update'),
+            'canApprove' => $this->can($request, 'approve'),
         ]);
     }
 
     public function create(): View
     {
         $model = $this->modelClass();
+        $request = request();
+        $this->requirePermission($request, 'create');
 
         return view('admin.crud.form', [
             'title' => $this->title(),
@@ -100,11 +135,14 @@ abstract class CrudController extends Controller
             'action' => route("admin.{$this->viewPrefix()}.store"),
             'method' => 'POST',
             'submitLabel' => 'Create',
+            'canSubmit' => $this->can($request, 'create'),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $this->requirePermission($request, 'create');
+
         $data = $request->validate($this->rules());
         $data = $this->transformInput($data);
 
@@ -117,6 +155,8 @@ abstract class CrudController extends Controller
 
     public function show(Request $request): View
     {
+        $this->requirePermission($request, 'view');
+
         $record = $this->resolveRecord($request);
 
         return view('admin.crud.show', [
@@ -125,11 +165,15 @@ abstract class CrudController extends Controller
             'record' => $record,
             'fields' => $this->formFields($record),
             'routePrefix' => $this->viewPrefix(),
+            'showContext' => $this->showContext($record),
+            'canEdit' => $this->can($request, 'edit'),
         ]);
     }
 
     public function edit(Request $request): View
     {
+        $this->requirePermission($request, 'edit');
+
         $record = $this->resolveRecord($request);
 
         return view('admin.crud.form', [
@@ -141,11 +185,14 @@ abstract class CrudController extends Controller
             'action' => route("admin.{$this->viewPrefix()}.update", $record),
             'method' => 'PUT',
             'submitLabel' => 'Update',
+            'canSubmit' => $this->can($request, 'update'),
         ]);
     }
 
     public function update(Request $request): RedirectResponse
     {
+        $this->requirePermission($request, 'update');
+
         $record = $this->resolveRecord($request);
         $data = $request->validate($this->rules($record));
         $data = $this->transformInput($data, $record);
@@ -158,6 +205,8 @@ abstract class CrudController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        $this->requirePermission($request, 'delete');
+
         $record = $this->resolveRecord($request);
         $record->delete();
 

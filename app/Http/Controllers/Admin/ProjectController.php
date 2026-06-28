@@ -32,6 +32,11 @@ class ProjectController extends CrudController
         return 'Investment projects, balances, and operating status.';
     }
 
+    protected function with(): array
+    {
+        return ['members.member'];
+    }
+
     protected function columns(): array
     {
         return [
@@ -61,6 +66,26 @@ class ProjectController extends CrudController
             'invested_amount' => ['required', 'numeric', 'min:0'],
             'start_date' => ['nullable', 'date'],
             'status' => ['required', 'in:active,completed,cancelled'],
+        ];
+    }
+
+    protected function showContext(Model $record): array
+    {
+        $members = $record->members
+            ->sortBy(fn ($projectMember) => $projectMember->member?->full_name ?? $projectMember->member?->member_code ?? '')
+            ->values();
+
+        $allocatedTotal = $members->sum(fn ($projectMember) => (float) $projectMember->allocated_share_amount);
+        $projectAmount = (float) $record->invested_amount;
+
+        return [
+            'summary' => [
+                ['label' => 'Project Investment', 'value' => $projectAmount, 'type' => 'money'],
+                ['label' => 'Member Count', 'value' => $members->count(), 'type' => 'number'],
+                ['label' => 'Allocated by Members', 'value' => $allocatedTotal, 'type' => 'money'],
+                ['label' => 'Unallocated Balance', 'value' => max($projectAmount - $allocatedTotal, 0), 'type' => 'money'],
+            ],
+            'members' => $members,
         ];
     }
 }

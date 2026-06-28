@@ -73,7 +73,7 @@ class ModuleController extends Controller
     {
         return $this->renderModule(
             'Settings',
-            'Typed key-value settings and share configuration.',
+            'Operational switches and thresholds for the admin panel.',
             Setting::query()->latest()->paginate(10),
         );
     }

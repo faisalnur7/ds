@@ -28,59 +28,98 @@
                         </div>
                         <div>
                             <p class="font-[family-name:Space_Grotesk] text-lg font-bold tracking-tight">{{ config('app.name', 'Darus Salam CCIMS') }}</p>
-                            <p class="text-sm text-slate-400">Operations center</p>
+                            <p class="text-sm text-slate-400">{{ __('Operations center') }}</p>
                         </div>
                     </div>
 
                     <nav class="mt-10 space-y-2">
                         <x-admin-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                            Dashboard
+                            {{ __('Dashboard') }}
                         </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                            Users
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')">
-                            Roles
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.permissions.index')" :active="request()->routeIs('admin.permissions.*')">
-                            Permissions
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.members.index')" :active="request()->routeIs('admin.members.*')">
-                            Members
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.payments.index')" :active="request()->routeIs('admin.payments.*')">
-                            Payments
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.projects.index')" :active="request()->routeIs('admin.projects.*')">
-                            Projects
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.loans.index')" :active="request()->routeIs('admin.loans.*')">
-                            Loans
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.checkout-requests.index')" :active="request()->routeIs('admin.checkout-requests.*')">
-                            Checkout
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.share-settings.index')" :active="request()->routeIs('admin.share-settings.*')">
-                            Share Settings
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
-                            Settings
-                        </x-admin-nav-link>
-                        <x-admin-nav-link :href="route('admin.audit.index')" :active="request()->routeIs('admin.audit.*')">
-                            Audit
-                        </x-admin-nav-link>
+                        @if (auth()->user()?->hasPermission('view_members'))
+                            <x-admin-nav-link :href="route('admin.members.index')" :active="request()->routeIs('admin.members.*')">
+                                {{ __('Members') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (auth()->user()?->hasPermission('view_payments'))
+                            <x-admin-nav-link :href="route('admin.payments.index')" :active="request()->routeIs('admin.payments.*')">
+                                {{ __('Payments') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (
+                            auth()->user()?->hasPermission('view_expense_menu')
+                            || auth()->user()?->hasPermission('view_expense_categories')
+                            || auth()->user()?->hasPermission('view_expenses')
+                        )
+                            <p class="px-3 pt-4 text-xs uppercase tracking-[0.25em] text-slate-500">{{ __('Operational Expenses') }}</p>
+                            @if (auth()->user()?->hasPermission('view_expense_categories'))
+                                <x-admin-nav-link :href="route('admin.expense-categories.index')" :active="request()->routeIs('admin.expense-categories.*')">
+                                    {{ __('Expense Categories') }}
+                                </x-admin-nav-link>
+                            @endif
+                            @if (auth()->user()?->hasPermission('view_expenses'))
+                                <x-admin-nav-link :href="route('admin.expenses.index')" :active="request()->routeIs('admin.expenses.*')">
+                                    {{ __('Expenses') }}
+                                </x-admin-nav-link>
+                            @endif
+                        @endif
+                        @if (auth()->user()?->hasPermission('view_projects'))
+                            <x-admin-nav-link :href="route('admin.projects.index')" :active="request()->routeIs('admin.projects.*')">
+                                {{ __('Projects') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (auth()->user()?->hasPermission('view_loans'))
+                            <x-admin-nav-link :href="route('admin.loans.index')" :active="request()->routeIs('admin.loans.*')">
+                                {{ __('Loans') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (auth()->user()?->hasPermission('view_checkout_requests'))
+                            <x-admin-nav-link :href="route('admin.checkout-requests.index')" :active="request()->routeIs('admin.checkout-requests.*')">
+                                {{ __('Checkout') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (auth()->user()?->hasPermission('view_share_settings'))
+                            <x-admin-nav-link :href="route('admin.share-settings.index')" :active="request()->routeIs('admin.share-settings.*')">
+                                {{ __('Share Settings') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (auth()->user()?->hasPermission('view_settings'))
+                            <x-admin-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
+                                {{ __('Settings') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (auth()->user()?->hasPermission('view_audit_logs'))
+                            <x-admin-nav-link :href="route('admin.audit.index')" :active="request()->routeIs('admin.audit.*')">
+                                {{ __('Audit') }}
+                            </x-admin-nav-link>
+                        @endif
                         <x-admin-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')">
-                            Profile
+                            {{ __('Profile') }}
                         </x-admin-nav-link>
+                        @if (auth()->user()?->hasPermission('view_users'))
+                            <x-admin-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                                {{ __('Users') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (auth()->user()?->hasPermission('view_roles'))
+                            <x-admin-nav-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')">
+                                {{ __('Roles') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (auth()->user()?->hasPermission('view_permissions'))
+                            <x-admin-nav-link :href="route('admin.permissions.index')" :active="request()->routeIs('admin.permissions.*')">
+                                {{ __('Permissions') }}
+                            </x-admin-nav-link>
+                        @endif
                     </nav>
 
                     <div class="mt-10 rounded-3xl border border-white/10 bg-white/5 p-5">
-                        <p class="text-sm text-slate-400">Signed in as</p>
+                        <p class="text-sm text-slate-400">{{ __('Signed in as') }}</p>
                         <p class="mt-1 font-medium text-white">{{ auth()->user()->name }}</p>
                         <p class="text-sm text-slate-400">{{ auth()->user()->email }}</p>
                         <div class="mt-4">
                             <span class="inline-flex items-center rounded-full bg-amber-400/15 px-3 py-1 text-xs font-semibold text-amber-200">
-                                Operations access
+                                {{ __('Operations access') }}
                             </span>
                         </div>
                     </div>
@@ -101,13 +140,14 @@
                                     </svg>
                                 </button>
                                 <div>
-                                    <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Overview</p>
-                                    <h1 class="font-[family-name:Space_Grotesk] text-2xl font-bold text-white">@yield('header', 'Operations Dashboard')</h1>
+                                    <p class="text-xs uppercase tracking-[0.3em] text-slate-500">{{ __('Overview') }}</p>
+                                    <h1 class="font-[family-name:Space_Grotesk] text-2xl font-bold text-white">@yield('header', __('Operations Dashboard'))</h1>
                                 </div>
                             </div>
 
                             <div class="relative flex items-center gap-3">
                                 <div class="hidden xl:block">
+                                    <x-language-switcher />
                                     <x-theme-switcher />
                                 </div>
 
@@ -121,7 +161,7 @@
                                     </div>
                                     <div class="hidden sm:block">
                                         <p class="text-sm font-medium text-white">{{ auth()->user()->name }}</p>
-                                        <p class="text-xs text-slate-400">{{ auth()->user()->isAdmin() ? 'Administrator' : 'Member' }}</p>
+                                        <p class="text-xs text-slate-400">{{ auth()->user()->isAdmin() ? __('Administrator') : __('Member') }}</p>
                                     </div>
                                     <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
@@ -136,12 +176,12 @@
                                     style="display: none;"
                                 >
                                     <a href="{{ route('profile.edit') }}" class="flex items-center rounded-2xl px-4 py-3 text-sm text-slate-200 transition hover:bg-white/5">
-                                        Profile settings
+                                        {{ __('Profile settings') }}
                                     </a>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit" class="flex w-full items-center rounded-2xl px-4 py-3 text-sm text-rose-300 transition hover:bg-rose-500/10">
-                                            Log out
+                                            {{ __('Log out') }}
                                         </button>
                                     </form>
                                 </div>

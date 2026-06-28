@@ -17,6 +17,7 @@ class MembersSeeder extends Seeder
             [
                 'member_code' => 'DS-0001',
                 'full_name' => $memberUser->name,
+                'share_number' => 5,
                 'father_name' => 'Father Name',
                 'mother_name' => 'Mother Name',
                 'spouse_name' => 'Spouse Name',
@@ -42,7 +43,6 @@ class MembersSeeder extends Seeder
                 'remarks' => 'Seeded member profile',
                 'join_date' => now()->toDateString(),
                 'membership_status' => 'active',
-                'checkout_eligible_after_months' => 12,
             ]
         );
     }

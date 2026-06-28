@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 class Member extends Model
@@ -16,6 +16,7 @@ class Member extends Model
         'user_id',
         'member_code',
         'full_name',
+        'share_number',
         'father_name',
         'mother_name',
         'spouse_name',
@@ -41,12 +42,12 @@ class Member extends Model
         'remarks',
         'join_date',
         'membership_status',
-        'checkout_eligible_after_months',
     ];
 
     protected function casts(): array
     {
         return [
+            'share_number' => 'integer',
             'phone' => 'encrypted',
             'phone_search' => 'string',
             'nid_number' => 'encrypted',
@@ -73,6 +74,16 @@ class Member extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function shareHistories(): HasMany
+    {
+        return $this->hasMany(MemberShareHistory::class)->latest('changed_at');
+    }
+
+    public function latestPayment(): HasOne
+    {
+        return $this->hasOne(Payment::class)->latestOfMany('payment_month');
+    }
+
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
@@ -80,10 +91,27 @@ class Member extends Model
 
     public function getCheckoutEligibleOnAttribute(): ?Carbon
     {
-        if (! $this->join_date || ! $this->checkout_eligible_after_months) {
+        $months = (int) app(\App\Services\SettingsService::class)->get('checkout_eligible_months', 12);
+
+        if (! $this->join_date) {
             return null;
         }
 
-        return Carbon::parse($this->join_date)->copy()->addMonths((int) $this->checkout_eligible_after_months);
+        return Carbon::parse($this->join_date)->copy()->addMonths($months);
+    }
+
+    public static function nextMemberCode(): string
+    {
+        $lastCode = static::query()
+            ->orderByDesc('id')
+            ->value('member_code');
+
+        $nextNumber = 1;
+
+        if (is_string($lastCode) && preg_match('/^DS-(\d+)$/', $lastCode, $matches) === 1) {
+            $nextNumber = ((int) $matches[1]) + 1;
+        }
+
+        return sprintf('DS-%04d', $nextNumber);
     }
 }

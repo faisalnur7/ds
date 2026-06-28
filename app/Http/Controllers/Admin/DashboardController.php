@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\CheckoutRequest;
 use App\Models\Loan;
 use App\Models\Member;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\Payment;
 use App\Models\Project;
 use App\Models\ProfitDistribution;
@@ -27,6 +29,8 @@ class DashboardController extends Controller
             'verifiedUsers' => User::whereNotNull('email_verified_at')->count(),
             'members' => Member::count(),
             'payments' => Payment::count(),
+            'expenseCategories' => ExpenseCategory::count(),
+            'expenses' => Expense::count(),
             'projects' => Project::count(),
             'profits' => ProfitDistribution::count(),
             'checkouts' => CheckoutRequest::count(),

@@ -29,7 +29,7 @@ class PermissionController extends CrudController
 
     protected function pageDescription(): string
     {
-        return 'Atomic permission records used by roles and middleware.';
+        return 'Atomic permission records grouped by menu category and action.';
     }
 
     protected function columns(): array
@@ -37,16 +37,16 @@ class PermissionController extends CrudController
         return [
             ['label' => 'Name', 'key' => 'name'],
             ['label' => 'Slug', 'key' => 'slug'],
-            ['label' => 'Group', 'key' => 'group_name'],
+            ['label' => 'Category', 'key' => 'group_name'],
         ];
     }
 
     protected function formFields(?Model $record = null): array
     {
         return [
-            ['name' => 'name', 'label' => 'Name', 'type' => 'text'],
-            ['name' => 'slug', 'label' => 'Slug', 'type' => 'text', 'help' => 'Used in middleware and gates.'],
-            ['name' => 'group_name', 'label' => 'Group', 'type' => 'text'],
+            ['name' => 'name', 'label' => 'Name', 'type' => 'text', 'help' => 'Example: Create Members'],
+            ['name' => 'slug', 'label' => 'Slug', 'type' => 'text', 'help' => 'Example: create_members'],
+            ['name' => 'group_name', 'label' => 'Category', 'type' => 'text', 'help' => 'Example: members'],
         ];
     }
 
