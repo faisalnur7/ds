@@ -41,11 +41,56 @@ class AdminCrudTest extends TestCase
             'slug' => 'manage_test_data',
             'group_name' => 'testing',
         ]);
+        $auditPermission = Permission::create([
+            'name' => 'View audit logs',
+            'slug' => 'view_audit_logs_test',
+            'group_name' => 'compliance',
+        ]);
+        $role->permissions()->sync([$permission->id, $auditPermission->id]);
 
         $this->actingAs($admin)->get(route('admin.roles.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.roles.show', $role))->assertOk();
+        $this->actingAs($admin)
+            ->get(route('admin.roles.show', $role))
+            ->assertOk()
+            ->assertSee('Manage test data')
+            ->assertSee('View audit logs');
         $this->actingAs($admin)->get(route('admin.permissions.index'))->assertOk();
         $this->actingAs($admin)->get(route('admin.permissions.show', $permission))->assertOk();
+    }
+
+    public function test_admin_sees_a_toast_after_creating_a_permission(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->followingRedirects()
+            ->post(route('admin.permissions.store'), [
+                'name' => 'Create test records',
+                'slug' => 'create_test_records',
+                'group_name' => 'testing',
+            ])
+            ->assertOk()
+            ->assertSee('Created successfully.');
+    }
+
+    public function test_admin_sees_a_toast_after_updating_a_permission(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $permission = Permission::create([
+            'name' => 'Update test records',
+            'slug' => 'update_test_records',
+            'group_name' => 'testing',
+        ]);
+
+        $this->actingAs($admin)
+            ->followingRedirects()
+            ->patch(route('admin.permissions.update', $permission), [
+                'name' => 'Update test records',
+                'slug' => 'update_test_records',
+                'group_name' => 'qa',
+            ])
+            ->assertOk()
+            ->assertSee('Updated successfully.');
     }
 
     public function test_admin_can_open_payment_and_member_crud_pages(): void
@@ -75,7 +120,6 @@ class AdminCrudTest extends TestCase
 
         $settings->put('auto_approve_payments', false, 'bool');
         $settings->put('checkout_eligible_months', 12, 'int');
-        $settings->put('loan_max_percent_of_share', 80, 'int');
         $settings->put('email_enabled', true, 'bool');
         $settings->put('notification_channels', true, 'bool');
 
@@ -84,7 +128,6 @@ class AdminCrudTest extends TestCase
             ->assertOk()
             ->assertSee('Auto approve payments')
             ->assertSee('Checkout eligibility window')
-            ->assertSee('Maximum loan percentage')
             ->assertSee('Email notifications')
             ->assertSee('Notification channels')
             ->assertSee('Save changes');
@@ -97,13 +140,11 @@ class AdminCrudTest extends TestCase
 
         $settings->put('auto_approve_payments', false, 'bool');
         $settings->put('checkout_eligible_months', 12, 'int');
-        $settings->put('loan_max_percent_of_share', 80, 'int');
         $settings->put('email_enabled', true, 'bool');
         $settings->put('notification_channels', true, 'bool');
 
         $autoApprove = Setting::query()->where('key', 'auto_approve_payments')->firstOrFail();
         $checkoutMonths = Setting::query()->where('key', 'checkout_eligible_months')->firstOrFail();
-        $loanPercent = Setting::query()->where('key', 'loan_max_percent_of_share')->firstOrFail();
         $emailEnabled = Setting::query()->where('key', 'email_enabled')->firstOrFail();
         $notificationChannels = Setting::query()->where('key', 'notification_channels')->firstOrFail();
 
@@ -118,13 +159,6 @@ class AdminCrudTest extends TestCase
             ->patch(route('admin.settings.update', $checkoutMonths), [
                 'setting_key' => 'checkout_eligible_months',
                 'value' => 18,
-            ])
-            ->assertRedirect(route('admin.settings.index'));
-
-        $this->actingAs($admin)
-            ->patch(route('admin.settings.update', $loanPercent), [
-                'setting_key' => 'loan_max_percent_of_share',
-                'value' => 90,
             ])
             ->assertRedirect(route('admin.settings.index'));
 
@@ -144,7 +178,6 @@ class AdminCrudTest extends TestCase
 
         $this->assertSame('1', Setting::query()->where('key', 'auto_approve_payments')->value('value'));
         $this->assertSame('18', Setting::query()->where('key', 'checkout_eligible_months')->value('value'));
-        $this->assertSame('90', Setting::query()->where('key', 'loan_max_percent_of_share')->value('value'));
         $this->assertSame('0', Setting::query()->where('key', 'email_enabled')->value('value'));
         $this->assertSame('0', Setting::query()->where('key', 'notification_channels')->value('value'));
     }
@@ -178,6 +211,12 @@ class AdminCrudTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.projects.show', $project))
             ->assertOk()
+            ->assertSee('Input project profit')
+            ->assertSee('Disburse profit')
+            ->assertSee('Allocate member')
+            ->assertSee(route('admin.project-incomes.create', ['project_id' => $project->id]), false)
+            ->assertSee(route('admin.profit-distributions.create', ['project_id' => $project->id]), false)
+            ->assertSee(route('admin.project-members.create', ['project_id' => $project->id]), false)
             ->assertSee('Member investments')
             ->assertSee('Alpha Member')
             ->assertSee('Beta Member')
@@ -187,6 +226,138 @@ class AdminCrudTest extends TestCase
             ->assertSee('20,000.00');
     }
 
+    public function test_project_member_create_prefills_project_from_query_string(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $project = Project::query()->create([
+            'name' => 'Prefill Project',
+            'description' => 'Test project',
+            'invested_amount' => 10000,
+            'start_date' => '2026-06-01',
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.project-members.create', ['project_id' => $project->id]))
+            ->assertOk()
+            ->assertSee('value="'.$project->id.'" selected', false);
+    }
+
+    public function test_project_member_allocation_cannot_exceed_project_investment_on_create(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $project = Project::query()->create([
+            'name' => 'Limited Project',
+            'description' => 'Test project',
+            'invested_amount' => 500000,
+            'start_date' => '2026-06-01',
+            'status' => 'active',
+        ]);
+        $member = Member::factory()->create();
+
+        $this->actingAs($admin)
+            ->post(route('admin.project-members.store'), [
+                'project_id' => $project->id,
+                'member_id' => $member->id,
+                'allocated_share_amount' => 500001,
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('allocated_share_amount');
+    }
+
+    public function test_project_member_allocation_cannot_exceed_project_investment_on_update(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $project = Project::query()->create([
+            'name' => 'Limited Project Update',
+            'description' => 'Test project',
+            'invested_amount' => 250000,
+            'start_date' => '2026-06-01',
+            'status' => 'active',
+        ]);
+        $member = Member::factory()->create();
+        $projectMember = ProjectMember::query()->create([
+            'project_id' => $project->id,
+            'member_id' => $member->id,
+            'allocated_share_amount' => 100000,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.project-members.update', $projectMember), [
+                'project_id' => $project->id,
+                'member_id' => $member->id,
+                'allocated_share_amount' => 250001,
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('allocated_share_amount');
+    }
+
+    public function test_project_income_create_prefills_project_from_query_string(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $project = Project::query()->create([
+            'name' => 'Income Project',
+            'description' => 'Test project',
+            'invested_amount' => 25000,
+            'start_date' => '2026-06-01',
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.project-incomes.create', ['project_id' => $project->id]))
+            ->assertOk()
+            ->assertSee('value="'.$project->id.'" selected', false);
+    }
+
+    public function test_profit_distribution_create_limits_members_to_project_allocations(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $project = Project::query()->create([
+            'name' => 'Profit Project',
+            'description' => 'Test project',
+            'invested_amount' => 60000,
+            'start_date' => '2026-06-01',
+            'status' => 'active',
+        ]);
+        $memberA = Member::factory()->create(['full_name' => 'Allocated Alpha', 'member_code' => 'DS-3101']);
+        $memberB = Member::factory()->create(['full_name' => 'Allocated Beta', 'member_code' => 'DS-3102']);
+        $memberC = Member::factory()->create(['full_name' => 'Unrelated Gamma', 'member_code' => 'DS-3999']);
+
+        ProjectMember::query()->create([
+            'project_id' => $project->id,
+            'member_id' => $memberA->id,
+            'allocated_share_amount' => 10000,
+            'is_active' => true,
+        ]);
+        ProjectMember::query()->create([
+            'project_id' => $project->id,
+            'member_id' => $memberB->id,
+            'allocated_share_amount' => 15000,
+            'is_active' => true,
+        ]);
+        ProjectMember::query()->create([
+            'project_id' => Project::query()->create([
+                'name' => 'Other Project',
+                'description' => 'Other',
+                'invested_amount' => 10000,
+                'start_date' => '2026-06-01',
+                'status' => 'active',
+            ])->id,
+            'member_id' => $memberC->id,
+            'allocated_share_amount' => 2000,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.profit-distributions.create', ['project_id' => $project->id]))
+            ->assertOk()
+            ->assertSee('value="'.$project->id.'" selected', false)
+            ->assertSee('Allocated Alpha (DS-3101)')
+            ->assertSee('Allocated Beta (DS-3102)')
+            ->assertDontSee('Unrelated Gamma');
+    }
+
     public function test_admin_can_version_share_settings_and_payment_defaults_follow_active_setting(): void
     {
         $admin = User::factory()->admin()->create();
@@ -194,8 +365,6 @@ class AdminCrudTest extends TestCase
         $this->actingAs($admin)->post(route('admin.share-settings.store'), [
             'share_value' => 1000,
             'share_cost' => 50,
-            'fine_amount' => 20,
-            'fine_percent' => 0,
             'effective_from' => '2026-06-01',
             'is_active' => true,
         ])->assertRedirect();
@@ -206,8 +375,6 @@ class AdminCrudTest extends TestCase
         $this->actingAs($admin)->post(route('admin.share-settings.store'), [
             'share_value' => 1500,
             'share_cost' => 50,
-            'fine_amount' => 25,
-            'fine_percent' => 0,
             'effective_from' => '2026-07-01',
             'is_active' => true,
         ])->assertRedirect();
@@ -223,7 +390,7 @@ class AdminCrudTest extends TestCase
             ->assertOk()
             ->assertSee('1500.00')
             ->assertSee('50.00')
-            ->assertSee('25.00');
+            ->assertDontSee('Fine');
     }
 
     public function test_settings_page_renders_checkout_months_setting_as_a_number(): void
@@ -245,16 +412,12 @@ class AdminCrudTest extends TestCase
         $activeSetting = ShareSetting::query()->create([
             'share_value' => 1000,
             'share_cost' => 50,
-            'fine_amount' => 20,
-            'fine_percent' => 0,
             'effective_from' => '2026-06-01',
             'is_active' => true,
         ]);
         $inactiveSetting = ShareSetting::query()->create([
             'share_value' => 1500,
             'share_cost' => 75,
-            'fine_amount' => 25,
-            'fine_percent' => 0,
             'effective_from' => '2026-07-01',
             'is_active' => false,
         ]);
@@ -381,8 +544,6 @@ class AdminCrudTest extends TestCase
         ShareSetting::query()->create([
             'share_value' => 1000,
             'share_cost' => 50,
-            'fine_amount' => 20,
-            'fine_percent' => 0,
             'effective_from' => '2026-06-01',
             'is_active' => true,
         ]);
@@ -461,8 +622,6 @@ class AdminCrudTest extends TestCase
         ShareSetting::query()->create([
             'share_value' => 1000,
             'share_cost' => 50,
-            'fine_amount' => 20,
-            'fine_percent' => 0,
             'effective_from' => '2026-06-01',
             'is_active' => true,
         ]);
@@ -471,13 +630,11 @@ class AdminCrudTest extends TestCase
         Payment::query()->create([
             'member_id' => $member->id,
             'payment_month' => now()->subMonth()->startOfMonth()->toDateString(),
-            'due_date' => now()->subMonth()->startOfMonth()->addDays(10)->toDateString(),
             'share_value' => 1250,
             'share_cost' => 75,
-            'fine_amount' => 30,
             'is_late' => false,
-            'total_amount' => 1355,
-            'amount_paid' => 1355,
+            'total_amount' => 1325,
+            'amount_paid' => 1325,
             'payment_status_detail' => 'full',
             'payment_method' => 'cash',
             'transaction_no' => 'PAY-OLD-0001',
@@ -488,29 +645,75 @@ class AdminCrudTest extends TestCase
         $response = $this->actingAs($admin)->post(route('admin.payments.store'), [
             'member_id' => $member->id,
             'payment_month' => now()->startOfMonth()->toDateString(),
-            'due_date' => now()->startOfMonth()->addDays(10)->toDateString(),
             'amount_paid' => '',
             'payment_method' => 'cash',
             'status' => 'pending',
             'payment_status_detail' => 'full',
         ]);
 
-        $response->assertRedirect();
-
         $payment = Payment::query()
             ->where('member_id', $member->id)
             ->whereDate('payment_month', now()->startOfMonth())
             ->firstOrFail();
 
+        $response->assertRedirect(route('admin.payments.receipt', $payment));
+
         $this->assertSame('5000.00', (string) $payment->share_value);
         $this->assertSame('250.00', (string) $payment->share_cost);
-        $this->assertSame('20.00', (string) $payment->fine_amount);
-        $this->assertSame('5270.00', (string) $payment->total_amount);
-        $this->assertSame('5270.00', (string) $payment->amount_paid);
+        $this->assertSame('5250.00', (string) $payment->total_amount);
+        $this->assertSame('5250.00', (string) $payment->amount_paid);
         $this->assertNotEmpty($payment->transaction_no);
         $this->assertNotEmpty($payment->receipt_no);
         $this->assertStringStartsWith('PAY-', $payment->transaction_no);
         $this->assertStringStartsWith('RCPT-', $payment->receipt_no);
+
+        $this->actingAs($admin)
+            ->get(route('admin.payments.receipt', $payment))
+            ->assertOk()
+            ->assertSee('Payment Receipt')
+            ->assertSee('Print receipt');
+    }
+
+    public function test_payment_create_rejects_an_already_paid_month(): void
+    {
+        $admin = User::factory()->admin()->create();
+        ShareSetting::query()->create([
+            'share_value' => 1000,
+            'share_cost' => 50,
+            'effective_from' => '2026-06-01',
+            'is_active' => true,
+        ]);
+        $member = Member::factory()->create(['share_number' => 5]);
+
+        Payment::query()->create([
+            'member_id' => $member->id,
+            'payment_month' => now()->startOfMonth()->toDateString(),
+            'share_value' => 1250,
+            'share_cost' => 75,
+            'is_late' => false,
+            'total_amount' => 1325,
+            'amount_paid' => 1325,
+            'payment_status_detail' => 'full',
+            'payment_method' => 'cash',
+            'transaction_no' => 'PAY-OLD-0001',
+            'status' => 'approved',
+            'receipt_no' => 'RCPT-OLD-0001',
+        ]);
+
+        $this->actingAs($admin)
+            ->from(route('admin.payments.create'))
+            ->post(route('admin.payments.store'), [
+                'member_id' => $member->id,
+                'payment_month' => now()->startOfMonth()->toDateString(),
+                'amount_paid' => '',
+                'payment_method' => 'cash',
+                'status' => 'pending',
+                'payment_status_detail' => 'full',
+            ])
+            ->assertRedirect(route('admin.payments.create'))
+            ->assertSessionHasErrors([
+                'payment_month' => __('Payment is already done for the selected month.'),
+            ]);
     }
 
     public function test_member_index_shows_share_number(): void

@@ -1,7 +1,7 @@
-<div x-data class="inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1 text-slate-200">
+<div x-data class="inline-flex items-center rounded-full border border-white/10 bg-white/5 p-0.5 text-slate-200 sm:p-1">
     <button
         type="button"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-full transition"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-full transition sm:h-9 sm:w-9"
         :class="$store.theme.is('light') ? 'bg-amber-400 text-slate-950' : 'text-slate-300 hover:text-white'"
         @click="$store.theme.set('light')"
         aria-label="{{ __('Use light theme') }}"
@@ -14,7 +14,7 @@
     </button>
     <button
         type="button"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-full transition"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-full transition sm:h-9 sm:w-9"
         :class="$store.theme.is('dark') ? 'bg-amber-400 text-slate-950' : 'text-slate-300 hover:text-white'"
         @click="$store.theme.set('dark')"
         aria-label="{{ __('Use dark theme') }}"
@@ -26,7 +26,7 @@
     </button>
     <button
         type="button"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-full transition"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-full transition sm:h-9 sm:w-9"
         :class="$store.theme.is('system') ? 'bg-amber-400 text-slate-950' : 'text-slate-300 hover:text-white'"
         @click="$store.theme.set('system')"
         aria-label="{{ __('Use system theme') }}"

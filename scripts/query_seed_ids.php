@@ -14,7 +14,6 @@ $tables = [
     'project_members',
     'project_incomes',
     'profit_distributions',
-    'loans',
     'checkout_requests',
     'share_settings',
     'settings',

@@ -23,7 +23,6 @@ class PermissionsSeeder extends Seeder
             $this->crudPermissions('project_members', 'Project Members'),
             $this->crudPermissions('project_incomes', 'Project Incomes'),
             $this->crudPermissions('profit_distributions', 'Profit Distributions'),
-            $this->crudPermissions('loans', 'Loans'),
             $this->crudPermissions('checkout_requests', 'Checkout Requests'),
             $this->crudPermissions('expense_categories', 'Expense Categories'),
             $this->crudPermissions('expenses', 'Expenses'),

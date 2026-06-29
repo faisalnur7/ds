@@ -4,7 +4,7 @@
 @section('header', __($title))
 
 @section('content')
-    <div class="mx-auto max-w-4xl space-y-6">
+    <div class="{{ $formContainerClass ?? 'mx-auto max-w-4xl space-y-6' }}">
         <section class="rounded-[2rem] ccims-panel-strong p-6 sm:p-8">
             <p class="text-sm font-medium uppercase tracking-[0.3em] text-amber-200/80">{{ __('Form') }}</p>
             <h2 class="mt-3 font-[family-name:Space_Grotesk] text-3xl font-bold text-white">{{ __($title) }}</h2>
@@ -17,8 +17,9 @@
             class="space-y-6 rounded-[2rem] ccims-panel p-6 sm:p-8"
             @isset($memberDefaults)
                 @if (! empty($paymentAutoFill))
-                x-data="paymentDefaults(@js($memberDefaults))"
+                x-data="paymentDefaults(@js($memberDefaults), @js($memberPaymentMonths ?? []))"
                 x-init="applyMemberDefaults(document.getElementById('member_id')?.value)"
+                x-on:submit="validatePaymentMonth($event)"
                 @endif
             @endisset
         >
@@ -52,7 +53,7 @@
                                 name="{{ $field['name'] }}"
                                 class="ccims-input"
                                 @if (($field['name'] ?? '') === 'member_id' && isset($memberDefaults) && ! empty($paymentAutoFill))
-                                    x-on:change="applyMemberDefaults($event.target.value)"
+                                    x-on:change="applyMemberDefaults($event.target.value); checkDuplicatePaymentMonth()"
                                 @endif
                             >
                                 @foreach ($field['options'] as $value => $label)
@@ -143,6 +144,10 @@
                                 name="{{ $field['name'] }}"
                                 value="{{ ($field['type'] ?? 'text') === 'password' ? '' : $rawValue }}"
                                 class="ccims-input {{ $isReadonly ? 'bg-white/10' : '' }}"
+                                @if (($field['name'] ?? '') === 'payment_month' && isset($memberPaymentMonths) && ! empty($paymentAutoFill))
+                                    x-on:change="checkDuplicatePaymentMonth()"
+                                    x-on:input="checkDuplicatePaymentMonth()"
+                                @endif
                                 @if (isset($field['min'])) min="{{ $field['min'] }}" @endif
                                 @if (isset($field['max'])) max="{{ $field['max'] }}" @endif
                                 @if (isset($field['step'])) step="{{ $field['step'] }}" @endif
@@ -172,9 +177,10 @@
 
     @isset($memberDefaults)
         <script>
-            window.paymentDefaults = function paymentDefaults(defaults) {
+            window.paymentDefaults = function paymentDefaults(defaults, paymentMonths) {
                 return {
                     defaults,
+                    paymentMonths,
                     applyMemberDefaults(memberId) {
                         const selected = memberId ? this.defaults[String(memberId)] : null;
                         const fallback = this.defaults.__default ?? {};
@@ -194,11 +200,43 @@
                         const amountInput = document.getElementById('amount_paid');
                         const shareValue = Number(document.getElementById('share_value')?.value || 0);
                         const shareCost = Number(document.getElementById('share_cost')?.value || 0);
-                        const fineAmount = Number(document.getElementById('fine_amount')?.value || 0);
 
                         if (amountInput) {
-                            amountInput.value = (shareValue + shareCost + fineAmount).toFixed(2);
+                            amountInput.value = (shareValue + shareCost).toFixed(2);
                         }
+                    },
+                    selectedPaymentMonths(memberId) {
+                        if (! memberId) {
+                            return [];
+                        }
+
+                        return this.paymentMonths[String(memberId)] ?? [];
+                    },
+                    checkDuplicatePaymentMonth() {
+                        const memberId = document.getElementById('member_id')?.value;
+                        const paymentMonth = document.getElementById('payment_month')?.value;
+
+                        if (! memberId || ! paymentMonth) {
+                            return false;
+                        }
+
+                        const alreadyPaid = this.selectedPaymentMonths(memberId).includes(paymentMonth);
+
+                        if (alreadyPaid) {
+                            alert(@js(__('Payment is already done for the selected month.')));
+                            return true;
+                        }
+
+                        return false;
+                    },
+                    validatePaymentMonth(event) {
+                        if (this.checkDuplicatePaymentMonth()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return false;
+                        }
+
+                        return true;
                     }
                 };
             };

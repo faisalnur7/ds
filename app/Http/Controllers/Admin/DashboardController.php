@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CheckoutRequest;
-use App\Models\Loan;
 use App\Models\Member;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
@@ -34,7 +33,6 @@ class DashboardController extends Controller
             'projects' => Project::count(),
             'profits' => ProfitDistribution::count(),
             'checkouts' => CheckoutRequest::count(),
-            'loans' => Loan::count(),
             'settings' => Setting::count(),
         ];
 

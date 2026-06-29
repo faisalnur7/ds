@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Project;
 use App\Models\ProjectIncome;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\View\View;
 
 class ProjectIncomeController extends CrudController
 {
@@ -46,6 +47,32 @@ class ProjectIncomeController extends CrudController
     protected function with(): array
     {
         return ['project'];
+    }
+
+    public function create(): View
+    {
+        $request = request();
+        $this->requirePermission($request, 'create');
+
+        $model = $this->modelClass();
+        $record = new $model();
+
+        if ($projectId = $request->integer('project_id')) {
+            $record->project_id = $projectId;
+        }
+
+        return view('admin.crud.form', [
+            'title' => $this->title(),
+            'description' => $this->pageDescription(),
+            'fields' => $this->formFields(),
+            'record' => $record,
+            'routePrefix' => $this->viewPrefix(),
+            'action' => route("admin.{$this->viewPrefix()}.store"),
+            'method' => 'POST',
+            'submitLabel' => 'Create',
+            'canSubmit' => $this->can($request, 'create'),
+            'formContainerClass' => $this->formContainerClass(),
+        ]);
     }
 
     protected function formFields(?Model $record = null): array

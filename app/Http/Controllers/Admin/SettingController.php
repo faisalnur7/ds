@@ -41,17 +41,6 @@ class SettingController extends CrudController
                 'max' => 120,
                 'step' => 1,
             ],
-            'loan_max_percent_of_share' => [
-                'label' => 'Maximum loan percentage',
-                'description' => 'Set the highest loan amount allowed as a percentage of the member share value.',
-                'help' => 'Enter a percentage from 0 to 100.',
-                'type' => 'number',
-                'value_type' => 'int',
-                'suffix' => '%',
-                'min' => 0,
-                'max' => 100,
-                'step' => 1,
-            ],
             'notification_channels' => [
                 'label' => 'Notification channels',
                 'description' => 'Enable or disable the notification delivery channels used by the system.',

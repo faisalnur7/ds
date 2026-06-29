@@ -13,7 +13,6 @@ class ShareSetting extends Model
     protected $fillable = [
         'share_value',
         'share_cost',
-        'fine_amount',
         'effective_from',
         'is_active',
     ];
@@ -23,7 +22,6 @@ class ShareSetting extends Model
         return [
             'share_value' => 'decimal:2',
             'share_cost' => 'decimal:2',
-            'fine_amount' => 'decimal:2',
             'effective_from' => 'date',
             'is_active' => 'boolean',
         ];

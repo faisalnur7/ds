@@ -2,14 +2,27 @@
 
 namespace App\Models;
 
+use App\Services\TransactionLedgerService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Expense extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $expense): void {
+            app(TransactionLedgerService::class)->syncExpense($expense);
+        });
+
+        static::deleted(function (self $expense): void {
+            app(TransactionLedgerService::class)->removeSource($expense);
+        });
+    }
 
     protected $fillable = [
         'expense_category_id',
@@ -40,5 +53,10 @@ class Expense extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function transaction(): MorphOne
+    {
+        return $this->morphOne(Transaction::class, 'source');
     }
 }

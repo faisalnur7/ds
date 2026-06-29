@@ -37,6 +37,16 @@ class RoleController extends CrudController
         return 'System roles and permission sets for ERP access control.';
     }
 
+    protected function showContainerClass(): string
+    {
+        return 'mx-auto max-w-7xl space-y-6';
+    }
+
+    protected function formContainerClass(): string
+    {
+        return 'mx-auto max-w-7xl space-y-6';
+    }
+
     protected function columns(): array
     {
         return [
@@ -83,7 +93,7 @@ class RoleController extends CrudController
                 'span' => 2,
                 'groups' => $groupedPermissions,
             ],
-            ['name' => 'is_system', 'label' => 'System Role', 'type' => 'toggle', 'helper' => 'Protect this role from deletion.'],
+            ['name' => 'is_system', 'label' => 'System Role', 'type' => 'toggle', 'helper' => 'Protect this role from deletion.', 'span' => 2],
         ];
     }
 

@@ -78,7 +78,7 @@ class ProjectController extends CrudController
         $allocatedTotal = $members->sum(fn ($projectMember) => (float) $projectMember->allocated_share_amount);
         $projectAmount = (float) $record->invested_amount;
 
-        return [
+        $context = [
             'summary' => [
                 ['label' => 'Project Investment', 'value' => $projectAmount, 'type' => 'money'],
                 ['label' => 'Member Count', 'value' => $members->count(), 'type' => 'number'],
@@ -87,5 +87,27 @@ class ProjectController extends CrudController
             ],
             'members' => $members,
         ];
+
+        if ($this->can(request(), 'create')) {
+            $context['actions'] = [
+                [
+                    'label' => 'Input project profit',
+                    'href' => route('admin.project-incomes.create', ['project_id' => $record->getKey()]),
+                    'buttonClass' => 'bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300',
+                ],
+                [
+                    'label' => 'Disburse profit',
+                    'href' => route('admin.profit-distributions.create', ['project_id' => $record->getKey()]),
+                    'buttonClass' => 'border border-emerald-300/20 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/20',
+                ],
+                [
+                    'label' => 'Allocate member',
+                    'href' => route('admin.project-members.create', ['project_id' => $record->getKey()]),
+                    'buttonClass' => 'bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300',
+                ],
+            ];
+        }
+
+        return $context;
     }
 }

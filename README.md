@@ -1,6 +1,6 @@
 # Darus Salam CCIMS
 
-Darus Salam CCIMS is a cooperative finance and investment management system for member onboarding, share collection, loan tracking, profit distribution, and checkout workflows.
+Darus Salam CCIMS is a cooperative finance and investment management system for member onboarding, share collection, profit distribution, and checkout workflows.
 
 ## Theme
 
@@ -38,3 +38,4 @@ Seeded demo credentials:
 - `/` opens the branded login screen.
 - Logged-in users land on the dashboard shell.
 - Admin area is available under `/admin`.
+- User guide: [USER_MANUAL.md](/home/faisal/Sites/ds/USER_MANUAL.md)

@@ -33,7 +33,7 @@ class ShareSettingController extends CrudController
 
     protected function pageDescription(): string
     {
-        return 'Versioned share values and fine rules. Only one setting should be active at a time.';
+        return 'Versioned share values and cost rules. Only one setting should be active at a time.';
     }
 
     protected function columns(): array
@@ -42,7 +42,6 @@ class ShareSettingController extends CrudController
             ['label' => 'Effective From', 'key' => 'effective_from', 'type' => 'date'],
             ['label' => 'Share Value', 'key' => 'share_value', 'type' => 'money'],
             ['label' => 'Share Cost', 'key' => 'share_cost', 'type' => 'money'],
-            ['label' => 'Fine', 'key' => 'fine_amount', 'type' => 'money'],
             ['label' => 'Active', 'key' => 'is_active', 'type' => 'bool'],
         ];
     }
@@ -59,7 +58,6 @@ class ShareSettingController extends CrudController
         return [
             ['name' => 'share_value', 'label' => 'Share Value', 'type' => 'number'],
             ['name' => 'share_cost', 'label' => 'Share Cost', 'type' => 'number'],
-            ['name' => 'fine_amount', 'label' => 'Flat Fine', 'type' => 'number'],
             ['name' => 'effective_from', 'label' => 'Effective From', 'type' => 'date'],
             ['name' => 'is_active', 'label' => 'Active', 'type' => 'toggle', 'helper' => 'Activating this version disables the other active version.'],
         ];
@@ -70,7 +68,6 @@ class ShareSettingController extends CrudController
         return [
             'share_value' => ['required', 'numeric', 'min:0'],
             'share_cost' => ['required', 'numeric', 'min:0'],
-            'fine_amount' => ['required', 'numeric', 'min:0'],
             'effective_from' => ['required', 'date'],
             'is_active' => ['nullable', 'boolean'],
         ];

@@ -14,7 +14,6 @@ class ShareSettingsSeeder extends Seeder
             [
                 'share_value' => 1000,
                 'share_cost' => 50,
-                'fine_amount' => 20,
                 'is_active' => true,
             ]
         );

@@ -74,6 +74,11 @@ class Member extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function checkoutRequests(): HasMany
+    {
+        return $this->hasMany(CheckoutRequest::class);
+    }
+
     public function shareHistories(): HasMany
     {
         return $this->hasMany(MemberShareHistory::class)->latest('changed_at');
@@ -82,11 +87,6 @@ class Member extends Model
     public function latestPayment(): HasOne
     {
         return $this->hasOne(Payment::class)->latestOfMany('payment_month');
-    }
-
-    public function loans(): HasMany
-    {
-        return $this->hasMany(Loan::class);
     }
 
     public function getCheckoutEligibleOnAttribute(): ?Carbon

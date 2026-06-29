@@ -1,10 +1,10 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CheckoutRequestController;
 use App\Http\Controllers\Admin\AuditLogController;
-use App\Http\Controllers\Admin\LoanController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\MemberDocumentController;
 use App\Http\Controllers\Admin\PaymentController;
@@ -15,10 +15,12 @@ use App\Http\Controllers\Admin\ProfitDistributionController;
 use App\Http\Controllers\Admin\ProjectIncomeController;
 use App\Http\Controllers\Admin\ProjectMemberController;
 use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ShareSettingController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\MemberCheckoutRequestController;
 use App\Http\Controllers\PaymentHistoryController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
@@ -34,14 +36,14 @@ Route::post('/locale/{locale}', function (Request $request, string $locale) {
     return back();
 })->name('locale.switch');
 
-Route::get('/dashboard', function () {
-    return auth()->user()?->isAdmin()
-        ? redirect()->route('admin.dashboard')
-        : view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/checkout-requests', [MemberCheckoutRequestController::class, 'index'])->name('checkout-requests.index');
+    Route::post('/checkout-requests', [MemberCheckoutRequestController::class, 'store'])->name('checkout-requests.store');
+});
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/', AdminDashboardController::class)->name('dashboard');
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('permissions', PermissionController::class);
@@ -56,12 +58,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('members', MemberController::class);
     Route::resource('member-documents', MemberDocumentController::class);
     Route::resource('payments', PaymentController::class);
+    Route::get('payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
+    Route::get('payments/{payment}/receipt/download', [PaymentController::class, 'downloadReceipt'])->name('payments.receipt.download');
     Route::resource('projects', ProjectController::class);
     Route::resource('project-members', ProjectMemberController::class);
     Route::resource('project-incomes', ProjectIncomeController::class);
     Route::resource('profit-distributions', ProfitDistributionController::class);
-    Route::resource('loans', LoanController::class);
     Route::resource('checkout-requests', CheckoutRequestController::class);
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
     Route::get('audit-logs', [AuditLogController::class, 'index'])->middleware('permission:view_audit_logs')->name('audit.index');
 });
 

@@ -23,7 +23,7 @@ const applyTheme = (mode) => {
 };
 
 Alpine.store('theme', {
-    mode: localStorage.getItem(themeStorageKey) || 'system',
+    mode: document.documentElement.dataset.themeMode || localStorage.getItem(themeStorageKey) || 'system',
 
     init() {
         this.sync();

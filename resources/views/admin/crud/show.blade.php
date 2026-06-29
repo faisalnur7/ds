@@ -4,7 +4,7 @@
 @section('header', __($title))
 
 @section('content')
-    <div class="mx-auto max-w-4xl space-y-6">
+    <div class="{{ $showContainerClass ?? 'mx-auto max-w-4xl space-y-6' }}">
         <section class="rounded-[2rem] ccims-panel-strong p-6 sm:p-8">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
@@ -24,14 +24,39 @@
         <section class="rounded-[2rem] ccims-panel p-6 sm:p-8">
             <dl class="grid gap-4 sm:grid-cols-2">
                 @foreach ($fields as $field)
-                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div class="{{ ($field['span'] ?? 1) === 2 ? 'sm:col-span-2' : '' }} rounded-2xl border border-white/10 bg-white/5 p-4">
                         <dt class="text-xs uppercase tracking-[0.24em] text-slate-400">{{ __($field['label']) }}</dt>
                         <dd class="mt-2 text-sm text-white">
-                            @php($value = data_get($record, $field['name']))
+                            @php
+                                $value = data_get($record, $field['name']);
+                            @endphp
                             @if (($field['type'] ?? 'text') === 'toggle')
                                 {{ __($value ? 'On' : 'Off') }}
                             @elseif (($field['type'] ?? 'text') === 'multiselect')
                                 {{ $value instanceof \Illuminate\Support\Collection ? $value->pluck('name')->join(', ') : collect($value ?? [])->join(', ') }}
+                            @elseif (($field['type'] ?? 'text') === 'grouped-multiselect')
+                                @php
+                                    $permissions = $value instanceof \Illuminate\Support\Collection ? $value : collect($value ?? []);
+                                    $groupedPermissions = $permissions->groupBy(fn ($permission) => $permission->group_name ?: 'other');
+                                @endphp
+                                @if ($groupedPermissions->isNotEmpty())
+                                    <div class="space-y-4">
+                                        @foreach ($groupedPermissions as $groupName => $items)
+                                            <div class="rounded-2xl border border-white/10 bg-slate-950/30 p-4">
+                                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200/80">{{ __(\Illuminate\Support\Str::headline(str_replace(['_', '-'], ' ', $groupName))) }}</p>
+                                                <div class="mt-3 flex flex-wrap gap-2">
+                                                    @foreach ($items as $permission)
+                                                        <span class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-200">
+                                                            {{ $permission->name }}
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-slate-400">{{ __('—') }}</span>
+                                @endif
                             @elseif (($field['type'] ?? 'text') === 'computed-date')
                                 {{ optional($value)->format('M j, Y') ?? '—' }}
                             @elseif (($field['type'] ?? 'text') === 'date')
@@ -58,15 +83,21 @@
                     </div>
                     <div class="flex flex-wrap gap-2">
                         @foreach ($showContext['actions'] as $action)
-                            <form method="POST" action="{{ $action['action'] }}">
-                                @csrf
-                                @if (($action['method'] ?? 'POST') !== 'POST')
-                                    @method($action['method'])
-                                @endif
-                                <button type="submit" class="rounded-full {{ $action['buttonClass'] ?? 'bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300' }}">
+                            @if (! empty($action['href']))
+                                <a href="{{ $action['href'] }}" class="rounded-full {{ $action['buttonClass'] ?? 'bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300' }}">
                                     {{ $action['label'] }}
-                                </button>
-                            </form>
+                                </a>
+                            @else
+                                <form method="POST" action="{{ $action['action'] }}">
+                                    @csrf
+                                    @if (($action['method'] ?? 'POST') !== 'POST')
+                                        @method($action['method'])
+                                    @endif
+                                    <button type="submit" class="rounded-full {{ $action['buttonClass'] ?? 'bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300' }}">
+                                        {{ $action['label'] }}
+                                    </button>
+                                </form>
+                            @endif
                         @endforeach
                     </div>
                 </div>

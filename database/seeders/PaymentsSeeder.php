@@ -17,13 +17,11 @@ class PaymentsSeeder extends Seeder
         Payment::query()->updateOrCreate(
             ['member_id' => $member->id, 'payment_month' => now()->startOfMonth()->toDateString()],
             [
-                'due_date' => now()->startOfMonth()->addDays(10)->toDateString(),
                 'share_value' => $shareSetting?->share_value ?? 0,
                 'share_cost' => $shareSetting?->share_cost ?? 0,
-                'fine_amount' => $shareSetting?->fine_amount ?? 0,
                 'is_late' => false,
-                'total_amount' => $shareSetting ? ($shareSetting->share_value + $shareSetting->share_cost + $shareSetting->fine_amount) : 0,
-                'amount_paid' => $shareSetting ? ($shareSetting->share_value + $shareSetting->share_cost + $shareSetting->fine_amount) : 0,
+                'total_amount' => $shareSetting ? ($shareSetting->share_value + $shareSetting->share_cost) : 0,
+                'amount_paid' => $shareSetting ? ($shareSetting->share_value + $shareSetting->share_cost) : 0,
                 'payment_status_detail' => 'full',
                 'payment_method' => 'cash',
                 'transaction_no' => 'PAY-0001',

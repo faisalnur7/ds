@@ -10,29 +10,45 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,700|inter:400,500,600" rel="stylesheet" />
 
+        <x-theme-bootstrap />
+
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="ccims-text antialiased">
+    <body class="ccims-text overflow-hidden antialiased bg-[var(--ccims-bg)]">
+        <x-flash-toast />
         <div
             x-data="{ sidebarOpen: false, userMenuOpen: false }"
-            class="min-h-screen ccims-shell-bg"
+            class="min-h-screen overflow-hidden ccims-shell-bg"
         >
-            <div class="flex min-h-screen">
+            <div class="flex h-dvh overflow-hidden">
                 <aside
-                    class="fixed inset-y-0 z-40 w-72 border-r border-white/10 bg-slate-950/90 px-6 py-6 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0"
+                    class="ccims-admin-sidebar fixed inset-y-0 left-0 z-40 flex h-dvh w-[min(19rem,calc(100vw-1.5rem))] -translate-x-full flex-col overflow-hidden px-4 py-4 transition-transform duration-300 sm:px-6 sm:py-6 lg:sticky lg:top-0 lg:h-dvh lg:w-72 lg:translate-x-0"
                     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                 >
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 via-teal-400 to-slate-900 text-slate-950 shadow-lg shadow-amber-500/20">
-                            <span class="text-lg font-bold">DS</span>
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 via-teal-400 to-slate-900 text-slate-950 shadow-lg shadow-amber-500/20">
+                                <span class="text-lg font-bold">DS</span>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="truncate font-[family-name:Space_Grotesk] text-lg font-bold tracking-tight">{{ config('app.name', 'Darus Salam CCIMS') }}</p>
+                                <p class="text-sm text-slate-400">{{ __('Operations center') }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="font-[family-name:Space_Grotesk] text-lg font-bold tracking-tight">{{ config('app.name', 'Darus Salam CCIMS') }}</p>
-                            <p class="text-sm text-slate-400">{{ __('Operations center') }}</p>
-                        </div>
+
+                        <button
+                            type="button"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-200 transition hover:bg-white/10 lg:hidden"
+                            @click="sidebarOpen = false"
+                            aria-label="Close sidebar"
+                        >
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 6l12 12M18 6l-12 12" />
+                            </svg>
+                        </button>
                     </div>
 
-                    <nav class="mt-10 space-y-2">
+                    <nav class="ccims-scrollbar-none mt-6 flex min-h-0 flex-1 flex-col space-y-1.5 overflow-y-auto sm:mt-8 sm:space-y-2">
                         <x-admin-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Dashboard') }}
                         </x-admin-nav-link>
@@ -44,6 +60,11 @@
                         @if (auth()->user()?->hasPermission('view_payments'))
                             <x-admin-nav-link :href="route('admin.payments.index')" :active="request()->routeIs('admin.payments.*')">
                                 {{ __('Payments') }}
+                            </x-admin-nav-link>
+                        @endif
+                        @if (auth()->user()?->isAdmin())
+                            <x-admin-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.*')">
+                                {{ __('Reports') }}
                             </x-admin-nav-link>
                         @endif
                         @if (
@@ -66,11 +87,6 @@
                         @if (auth()->user()?->hasPermission('view_projects'))
                             <x-admin-nav-link :href="route('admin.projects.index')" :active="request()->routeIs('admin.projects.*')">
                                 {{ __('Projects') }}
-                            </x-admin-nav-link>
-                        @endif
-                        @if (auth()->user()?->hasPermission('view_loans'))
-                            <x-admin-nav-link :href="route('admin.loans.index')" :active="request()->routeIs('admin.loans.*')">
-                                {{ __('Loans') }}
                             </x-admin-nav-link>
                         @endif
                         @if (auth()->user()?->hasPermission('view_checkout_requests'))
@@ -113,22 +129,12 @@
                         @endif
                     </nav>
 
-                    <div class="mt-10 rounded-3xl border border-white/10 bg-white/5 p-5">
-                        <p class="text-sm text-slate-400">{{ __('Signed in as') }}</p>
-                        <p class="mt-1 font-medium text-white">{{ auth()->user()->name }}</p>
-                        <p class="text-sm text-slate-400">{{ auth()->user()->email }}</p>
-                        <div class="mt-4">
-                            <span class="inline-flex items-center rounded-full bg-amber-400/15 px-3 py-1 text-xs font-semibold text-amber-200">
-                                {{ __('Operations access') }}
-                            </span>
-                        </div>
-                    </div>
                 </aside>
 
-                <div class="flex min-w-0 flex-1 flex-col lg:ml-0">
-                    <header class="sticky top-0 z-30 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
-                        <div class="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-                            <div class="flex items-center gap-3">
+                <div class="flex min-w-0 flex-1 flex-col overflow-hidden lg:ml-0">
+                    <header class="sticky top-0 z-30 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
+                        <div class="mx-auto flex w-full max-w-[480px] items-start justify-between gap-3 px-4 py-4 sm:px-5 lg:max-w-none lg:px-8">
+                            <div class="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
                                 <button
                                     type="button"
                                     class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-200 transition hover:bg-white/10 lg:hidden"
@@ -141,40 +147,41 @@
                                 </button>
                                 <div>
                                     <p class="text-xs uppercase tracking-[0.3em] text-slate-500">{{ __('Overview') }}</p>
-                                    <h1 class="font-[family-name:Space_Grotesk] text-2xl font-bold text-white">@yield('header', __('Operations Dashboard'))</h1>
+                                    <h1 class="max-w-[16rem] font-[family-name:Space_Grotesk] text-xl font-bold leading-tight text-white sm:max-w-none sm:text-2xl">
+                                        @yield('header', __('Operations Dashboard'))
+                                    </h1>
                                 </div>
                             </div>
 
-                            <div class="relative flex items-center gap-3">
-                                <div class="hidden xl:block">
+                            <div class="relative flex shrink-0 items-center justify-end gap-3">
+                                <div class="hidden xl:flex xl:items-center xl:gap-3">
                                     <x-language-switcher />
                                     <x-theme-switcher />
                                 </div>
 
                                 <button
                                     type="button"
-                                    class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-left transition hover:bg-white/10"
+                                    class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 transition hover:bg-white/10"
+                                    aria-label="{{ __('Open user menu') }}"
                                     @click="userMenuOpen = ! userMenuOpen"
                                 >
                                     <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-teal-400 text-sm font-bold text-slate-950">
                                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                     </div>
-                                    <div class="hidden sm:block">
-                                        <p class="text-sm font-medium text-white">{{ auth()->user()->name }}</p>
-                                        <p class="text-xs text-slate-400">{{ auth()->user()->isAdmin() ? __('Administrator') : __('Member') }}</p>
-                                    </div>
-                                    <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
-                                    </svg>
                                 </button>
 
                                 <div
                                     x-show="userMenuOpen"
                                     x-transition
                                     @click.outside="userMenuOpen = false"
-                                    class="absolute right-0 mt-3 w-56 rounded-3xl border border-white/10 bg-slate-900 p-2 shadow-2xl shadow-black/30"
+                                    class="ccims-admin-dropdown absolute right-0 top-full z-50 mt-3 w-[min(16rem,calc(100vw-2rem))] rounded-3xl p-2 sm:w-56"
                                     style="display: none;"
                                 >
+                                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                                        <p class="text-sm font-medium text-white">{{ auth()->user()->name }}</p>
+                                        <p class="mt-1 text-xs text-slate-400">{{ auth()->user()->isAdmin() ? __('Administrator') : __('Member') }}</p>
+                                    </div>
+                                    <div class="my-2 border-t border-white/10"></div>
                                     <a href="{{ route('profile.edit') }}" class="flex items-center rounded-2xl px-4 py-3 text-sm text-slate-200 transition hover:bg-white/5">
                                         {{ __('Profile settings') }}
                                     </a>
@@ -189,7 +196,7 @@
                         </div>
                     </header>
 
-                    <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+                    <main class="min-h-0 flex-1 overflow-y-auto px-4 py-5 pb-28 sm:px-5 lg:px-8">
                         @yield('content')
                     </main>
                 </div>
@@ -197,10 +204,49 @@
 
             <div
                 x-show="sidebarOpen"
-                class="fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-sm lg:hidden"
+                class="ccims-admin-overlay fixed inset-0 z-30 lg:hidden"
                 @click="sidebarOpen = false"
                 style="display: none;"
             ></div>
+
+            <div class="fixed inset-x-0 bottom-0 z-50 lg:hidden">
+                <div class="mx-auto w-full max-w-[480px] px-4 pb-4">
+                    <div class="ccims-mobile-tabbar rounded-[1.6rem] px-3 py-2">
+                        <div class="grid grid-cols-4 gap-2 text-xs font-semibold">
+                            <a href="{{ route('admin.dashboard') }}" @class([
+                                'rounded-[1.2rem] px-2 py-3 text-center transition',
+                                'bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' => request()->routeIs('admin.dashboard'),
+                                'text-slate-200 hover:bg-white/5' => ! request()->routeIs('admin.dashboard'),
+                            ])>
+                                {{ __('Home') }}
+                            </a>
+                            <a href="{{ route('profile.edit') }}" @class([
+                                'rounded-[1.2rem] px-2 py-3 text-center transition',
+                                'bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' => request()->routeIs('profile.*'),
+                                'text-slate-200 hover:bg-white/5' => ! request()->routeIs('profile.*'),
+                            ])>
+                                {{ __('Profile') }}
+                            </a>
+                            <button
+                                type="button"
+                                class="rounded-[1.2rem] px-2 py-3 text-center text-slate-200 transition hover:bg-white/5"
+                                @click="sidebarOpen = true"
+                            >
+                                {{ __('Menu') }}
+                            </button>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="w-full rounded-[1.2rem] px-2 py-3 text-center text-rose-200 transition hover:bg-rose-400/10"
+                                >
+                                    {{ __('Exit') }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
 </html>

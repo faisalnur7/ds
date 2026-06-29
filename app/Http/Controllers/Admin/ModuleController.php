@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\CheckoutRequest;
-use App\Models\Loan;
 use App\Models\Member;
 use App\Models\Payment;
 use App\Models\Project;
@@ -55,17 +54,8 @@ class ModuleController extends Controller
     {
         return $this->renderModule(
             'Checkout',
-            'Full and partial checkout requests with loan deductions.',
+            'Full and partial checkout requests with balance adjustments.',
             CheckoutRequest::query()->latest()->with('member')->paginate(10),
-        );
-    }
-
-    public function loans(): View
-    {
-        return $this->renderModule(
-            'Loans',
-            'Loan against share requests and repayment planning.',
-            Loan::query()->latest()->with('member')->paginate(10),
         );
     }
 

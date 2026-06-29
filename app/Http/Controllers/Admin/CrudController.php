@@ -41,6 +41,16 @@ abstract class CrudController extends Controller
         return '';
     }
 
+    protected function showContainerClass(): string
+    {
+        return 'mx-auto max-w-7xl space-y-6';
+    }
+
+    protected function formContainerClass(): string
+    {
+        return 'mx-auto max-w-7xl space-y-6';
+    }
+
     protected function permissionPrefix(): string
     {
         return Str::snake(str_replace('-', '_', $this->viewPrefix()));
@@ -136,6 +146,7 @@ abstract class CrudController extends Controller
             'method' => 'POST',
             'submitLabel' => 'Create',
             'canSubmit' => $this->can($request, 'create'),
+            'formContainerClass' => $this->formContainerClass(),
         ]);
     }
 
@@ -167,6 +178,7 @@ abstract class CrudController extends Controller
             'routePrefix' => $this->viewPrefix(),
             'showContext' => $this->showContext($record),
             'canEdit' => $this->can($request, 'edit'),
+            'showContainerClass' => $this->showContainerClass(),
         ]);
     }
 
@@ -186,6 +198,7 @@ abstract class CrudController extends Controller
             'method' => 'PUT',
             'submitLabel' => 'Update',
             'canSubmit' => $this->can($request, 'update'),
+            'formContainerClass' => $this->formContainerClass(),
         ]);
     }
 

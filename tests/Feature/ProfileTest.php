@@ -27,14 +27,15 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
+            ->followingRedirects()
             ->patch('/profile', [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
 
         $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertOk()
+            ->assertSee('Profile updated successfully.');
 
         $user->refresh();
 

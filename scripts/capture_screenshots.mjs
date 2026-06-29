@@ -338,7 +338,6 @@ async function runAdminPass(client) {
     ['admin/project-members', 'admin/project-members/index.png'],
     ['admin/project-incomes', 'admin/project-incomes/index.png'],
     ['admin/profit-distributions', 'admin/profit-distributions/index.png'],
-    ['admin/loans', 'admin/loans/index.png'],
     ['admin/checkout-requests', 'admin/checkout-requests/index.png'],
     ['admin/audit-logs', 'admin/audit-logs/index.png'],
   ];
@@ -384,9 +383,6 @@ async function runAdminPass(client) {
     ['admin/profit-distributions/create', 'admin/profit-distributions/create.png', 'create'],
     ['admin/profit-distributions/1', 'admin/profit-distributions/show.png', 'show'],
     ['admin/profit-distributions/1/edit', 'admin/profit-distributions/edit.png', 'edit'],
-    ['admin/loans/create', 'admin/loans/create.png', 'create'],
-    ['admin/loans/1', 'admin/loans/show.png', 'show'],
-    ['admin/loans/1/edit', 'admin/loans/edit.png', 'edit'],
     ['admin/checkout-requests/create', 'admin/checkout-requests/create.png', 'create'],
     ['admin/checkout-requests/1', 'admin/checkout-requests/show.png', 'show'],
     ['admin/checkout-requests/1/edit', 'admin/checkout-requests/edit.png', 'edit'],

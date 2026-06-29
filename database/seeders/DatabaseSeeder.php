@@ -30,8 +30,6 @@ class DatabaseSeeder extends Seeder
             ProjectIncomesSeeder::class,
             ProfitDistributionsSeeder::class,
             CheckoutRequestsSeeder::class,
-            LoansSeeder::class,
-            LoanRepaymentsSeeder::class,
             NotificationsSeeder::class,
             AuditLogsSeeder::class,
         ]);

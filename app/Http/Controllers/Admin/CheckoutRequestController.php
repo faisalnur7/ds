@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Models\CheckoutRequest;
 use App\Models\Member;
 use App\Models\User;
+use App\Notifications\MemberCheckoutRequestNotification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 class CheckoutRequestController extends CrudController
 {
@@ -57,7 +59,7 @@ class CheckoutRequestController extends CrudController
             ['name' => 'checkout_type', 'label' => 'Checkout Type', 'type' => 'select', 'options' => ['full' => 'Full', 'partial' => 'Partial']],
             ['name' => 'partial_percentage', 'label' => 'Partial Percentage', 'type' => 'number'],
             ['name' => 'refundable_amount', 'label' => 'Refundable Amount', 'type' => 'number'],
-            ['name' => 'outstanding_loan_deducted', 'label' => 'Outstanding Loan Deducted', 'type' => 'number'],
+            ['name' => 'outstanding_loan_deducted', 'label' => 'Outstanding Deduction', 'type' => 'number'],
             ['name' => 'status', 'label' => 'Status', 'type' => 'select', 'options' => ['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected', 'paid' => 'Paid']],
             ['name' => 'approved_by', 'label' => 'Approved By', 'type' => 'select', 'options' => User::query()->pluck('name', 'id')->all()],
             ['name' => 'paid_at', 'label' => 'Paid At', 'type' => 'datetime-local'],
@@ -77,5 +79,21 @@ class CheckoutRequestController extends CrudController
             'approved_by' => ['nullable', 'exists:users,id'],
             'paid_at' => ['nullable', 'date'],
         ];
+    }
+
+    protected function afterSave(Model $record, array $data, Request $request): void
+    {
+        $memberUser = $record->member?->user;
+
+        if (! $memberUser) {
+            return;
+        }
+
+        $notification = match ($record->status) {
+            'approved', 'paid', 'rejected' => MemberCheckoutRequestNotification::updated($record),
+            default => MemberCheckoutRequestNotification::submitted($record),
+        };
+
+        $memberUser->notify($notification);
     }
 }
